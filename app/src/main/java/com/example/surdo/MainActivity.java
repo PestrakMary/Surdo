@@ -5,25 +5,24 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
+public class MainActivity extends AppCompatActivity {
+    Map<String, Integer> mHashMap = new HashMap<>();
+    List<String> dictionary = new ArrayList<>();
+    List<Integer> video = new ArrayList<>();
     private Button buttonRecognize;
     private Button buttonLib;
     private Button buttonSettings;
     private FrameLayout fragmentContainer;
 
-    Map<String, Integer> mHashMap = new HashMap<>();
-    List<String> dictionary = new ArrayList<>();
-    List<Integer> video = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +43,11 @@ public class MainActivity extends AppCompatActivity {
         buttonLib = (Button) findViewById(R.id.buttonLib);
         buttonSettings = findViewById(R.id.buttonSettings);
         fragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
-
         buttonRecognize.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
+                bundle.putStringArrayList("text", (ArrayList<String>) dictionary);
                 bundle.putIntegerArrayList("video", (ArrayList<Integer>) video);
                 bundle.putString("packageName", getPackageName());
                 FragmentManager fm = getSupportFragmentManager();
@@ -83,6 +82,5 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
     }
 }
