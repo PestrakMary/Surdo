@@ -12,8 +12,9 @@
         android:id="@+id/listViewFragmentLib"
         android:layout_width="match_parent"
         android:layout_height="200dp"/>
+
     <VideoView
         android:id="@+id/videoViewFragmentLib"
         android:layout_width="match_parent"
-        android:layout_height="200dp"/>
+        android:layout_height="match_parent" />
 </LinearLayout>
