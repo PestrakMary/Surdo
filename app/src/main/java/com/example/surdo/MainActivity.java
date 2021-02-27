@@ -1,92 +1,56 @@
 package com.example.surdo;
 
-
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import androidx.room.Room;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
+import com.example.surdo.db.AppDatabase;
 
 public class MainActivity extends AppCompatActivity {
-    Map<String, Integer> mHashMap = new HashMap<>();
-    List<String> dictionary = new ArrayList<>();
-    List<Integer> video = new ArrayList<>();
-    private Button buttonRecognize;
-    private Button buttonLib;
-    private Button buttonSettings;
-    private FrameLayout fragmentContainer;
+    private AppDatabase database = null;
+    private LibFragment libFragment = null;
+    private RecognizeFragment recognizeFragment = null;
 
+    public AppDatabase getDatabase() {
+        return database;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //work with database
-        mHashMap.put("поворот направо", R.raw.turn_right);
-        mHashMap.put("поворот налево", R.raw.turn_left);
-        mHashMap.put("тормоз", R.raw.brake);
-        mHashMap.put("газ", R.raw.gas);
-        mHashMap.put("автомобиль", R.raw.car);
+        database = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "library")
+                .allowMainThreadQueries()
+                .build();
+        database.initializeDB();
 
-        dictionary.addAll(mHashMap.keySet());
-        video.addAll(mHashMap.values());
+        FragmentManager fm = getSupportFragmentManager();
+        recognizeFragment = (RecognizeFragment) fm.findFragmentById(R.id.fragmentContainer);
+        libFragment = (LibFragment) fm.findFragmentById(R.id.fragmentContainer);
+        if (recognizeFragment == null) {
+            recognizeFragment = new RecognizeFragment();
+            fm.beginTransaction()
+                    .add(R.id.fragmentContainer, recognizeFragment)
+                    .commit();
+        }
+    }
 
-        buttonRecognize = (Button) findViewById(R.id.buttonHome);
-        buttonLib = (Button) findViewById(R.id.buttonLib);
-        buttonSettings = findViewById(R.id.buttonSettings);
-        fragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
-        buttonRecognize.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bundle bundle = new Bundle();
-                bundle.putStringArrayList("text", (ArrayList<String>) dictionary);
-                bundle.putIntegerArrayList("video", (ArrayList<Integer>) video);
-                bundle.putString("packageName", getPackageName());
-                FragmentManager fm = getSupportFragmentManager();
+    public LibFragment getLibFragment() {
+        if (libFragment == null) {
+            libFragment = new LibFragment();
+        }
+        return libFragment;
+    }
 
-                Fragment fragment = fm.findFragmentById(R.id.fragmentContainer);
-                if (fragment == null) {
-                    fragment = new RecognizeFragment();
-                    fragment.setArguments(bundle);
-                    fm.beginTransaction()
-                            .add(R.id.fragmentContainer, fragment)
-                            .commit();
-                }
-            }
-        });
-        buttonLib.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bundle bundle = new Bundle();
-                bundle.putStringArrayList("text", (ArrayList<String>) dictionary);
-                bundle.putIntegerArrayList("video", (ArrayList<Integer>) video);
-                bundle.putString("packageName", getPackageName());
-                FragmentManager fm = getSupportFragmentManager();
-
-                Fragment fragment = fm.findFragmentById(R.id.fragmentContainer);
-                if (fragment == null) {
-                    fragment = new LibFragment();
-                    fragment.setArguments(bundle);
-                    fm.beginTransaction()
-                            .add(R.id.fragmentContainer, fragment)
-                            .commit();
-                }
-
-            }
-        });
+    public RecognizeFragment getRecognizeFragment() {
+        if (recognizeFragment == null) {
+            recognizeFragment = new RecognizeFragment();
+        }
+        return recognizeFragment;
     }
 }

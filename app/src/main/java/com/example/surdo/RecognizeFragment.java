@@ -4,24 +4,33 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.VideoView;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+
+import com.example.surdo.db.AppDatabase;
+import com.example.surdo.db.Command;
+
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -36,42 +45,49 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String PHRASE_SEARCH = "phrase";
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
-    String word;
     List<String> arguments;
     List<Integer> video;
     private VideoView videoViewFragmentRecognize;
-    private Button backButton;
-    private Button recognizeStart;
+    private TextView textViewCommand;
     private SpeechRecognizer recognizer;
     private int permissionCheck;
+    AppDatabase database;
 
     public RecognizeFragment() {
         // Required empty public constructor
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_recognize, container, false);
         videoViewFragmentRecognize = view.findViewById(R.id.videoViewFragmentRecognize);
-        backButton = view.findViewById(R.id.buttonBackToMain);
-        recognizeStart = view.findViewById(R.id.recognizeStartbutton);
-        arguments = getArguments().getStringArrayList("text");
-        video = getArguments().getIntegerArrayList("video");
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getFragmentManager().beginTransaction().remove(RecognizeFragment.this).commit();
-            }
-        });
+        Button backButton = view.findViewById(R.id.buttonBackToMain);
+        Button recognizeStart = view.findViewById(R.id.recognizeStartbutton);
+        textViewCommand = view.findViewById(R.id.textViewCommand);
 
-        recognizeStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switchSearch(PHRASE_SEARCH);
-            }
-        });
+        database = ((MainActivity) Objects.requireNonNull(getActivity())).getDatabase();
+
+        arguments = database.CommandDao().
+                getAll().
+                stream().
+                map(Command::getWord).
+                collect(Collectors.toList());
+        video = database.CommandDao().
+                getAll().
+                stream().
+                map(Command::getPath).
+                collect(Collectors.toList());
+
+        backButton.setOnClickListener(v -> Objects.requireNonNull(getFragmentManager()).
+                beginTransaction().
+                replace(R.id.fragmentContainer,
+                        ((MainActivity) Objects.requireNonNull(getActivity())).getLibFragment()).
+                commit());
+
+        recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
 
         return view;
     }
@@ -80,13 +96,13 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // get permissions
-        permissionCheck = ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.RECORD_AUDIO);
+        permissionCheck = ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()).getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         startSetup();
     }
 
     private void startSetup() {
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
+            ActivityCompat.requestPermissions(Objects.requireNonNull(getActivity()), new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
             return;
         }
         // Recognizer initialization is a time-consuming and it involves IO,
@@ -133,7 +149,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 permissionCheck = PackageManager.PERMISSION_GRANTED;
                 new SetupTask(this).execute();
             } else {
-                getFragmentManager().beginTransaction().remove(RecognizeFragment.this).commit();
+                Objects.requireNonNull(getFragmentManager()).beginTransaction().remove(RecognizeFragment.this).commit();
             }
         }
     }
@@ -166,7 +182,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     @Override
     public void onError(Exception error) {
         //вывести, что все плохо в TextView
-        Log.e("onError", error.getMessage());
+        Log.e("onError", Objects.requireNonNull(error.getMessage()));
     }
 
     @Override
@@ -220,7 +236,8 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             String strText = hypothesis.getHypstr();
             Log.e("onResult", strText);
             if (arguments.contains(strText)) { // necessary until not all phrases in car.gram implemented
-                videoViewFragmentRecognize.setVideoURI(Uri.parse("android.resource://" + getArguments().getString("packageName") + "/" + video.get(arguments.indexOf(strText))));
+                textViewCommand.setText(strText.toCharArray(), 0, strText.length());
+                videoViewFragmentRecognize.setVideoURI(Uri.parse("android.resource://" + Objects.requireNonNull(getActivity()).getPackageName() + "/" + video.get(arguments.indexOf(strText))));
                 videoViewFragmentRecognize.requestFocus(0);
                 videoViewFragmentRecognize.start();
             }
@@ -237,7 +254,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         @Override
         protected Exception doInBackground(Void... params) {
             try {
-                Assets assets = new Assets(activityReference.get().getActivity());
+                Assets assets = new Assets(Objects.requireNonNull(activityReference.get().getActivity()));
                 File assetDir = assets.syncAssets();
                 activityReference.get().setupRecognizer(assetDir);
             } catch (IOException e) {
