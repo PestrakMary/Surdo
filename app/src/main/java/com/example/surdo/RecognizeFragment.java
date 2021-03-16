@@ -2,7 +2,6 @@ package com.example.surdo;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -280,7 +279,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 Log.d("onPostExecute", Arrays.toString(Objects.requireNonNull(result.getStackTrace())));
             } else {
                 activityReference.get().switchSearch(KWS_SEARCH);
-                activityReference.get().getView().findViewById(R.id.recognizeStartbutton).setEnabled(true);
+                Objects.requireNonNull(activityReference.get().getView()).findViewById(R.id.recognizeStartbutton).setEnabled(true);
             }
         }
     }
