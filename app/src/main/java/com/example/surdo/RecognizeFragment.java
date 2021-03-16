@@ -2,6 +2,7 @@ package com.example.surdo;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -12,11 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -120,7 +123,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 .setDictionary(new File(assetsDir, "car.dict"))
                 .setBoolean("-remove_noise", true)
                 .setSampleRate(8000)
-                .setKeywordThreshold(1e-7f)
+                .setKeywordThreshold(1e-6f)
 
                 //.setRawLogDir(assetsDir) // To disable logging of raw audio comment out this call (takes a lot of space on the device)
 
@@ -135,7 +138,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
 
         File menuGrammar = new File(assetsDir, "car.gram");
-        Log.e("File", menuGrammar.getAbsolutePath());
+        Log.d("File", menuGrammar.getAbsolutePath());
         recognizer.addGrammarSearch(PHRASE_SEARCH, menuGrammar);
     }
 
@@ -166,16 +169,18 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     }
 
     private void switchSearch(String searchName) {
-        Log.e("switchSearch", "Try");
+        Log.d("switchSearch", "Try to switch");
         if (recognizer != null) {
             recognizer.stop();
             // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
             if (searchName.equals(KWS_SEARCH)) {
                 recognizer.startListening(searchName);
-                Log.e("switchSearch", "Activated");
+                Toast.makeText(Objects.requireNonNull(getActivity()).getApplicationContext(), "Скажите \"активировать\"", Toast.LENGTH_SHORT).show();
+                Log.d("switchSearch", "Activated");
             } else {
-                Log.e("switchSearch", "Start listening");
                 recognizer.startListening(searchName, 10000);
+                Toast.makeText(Objects.requireNonNull(getActivity()).getApplicationContext(), "Слушаю", Toast.LENGTH_SHORT).show();
+                Log.d("switchSearch", "Start listening");
             }
         }
     }
@@ -183,19 +188,21 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     @Override
     public void onError(Exception error) {
         //вывести, что все плохо в TextView
+        Toast.makeText(Objects.requireNonNull(getActivity()).getApplicationContext(), Objects.requireNonNull(error.getLocalizedMessage()), Toast.LENGTH_LONG).show();
         Log.e("onError", Objects.requireNonNull(error.getMessage()));
+        Log.d("onError", Arrays.toString(Objects.requireNonNull(error.getStackTrace())));
     }
 
     @Override
     public void onTimeout() {
         switchSearch(KWS_SEARCH);
-        Log.e("onTimeout", "Stop listening");
+        Log.d("onTimeout", "Stop listening");
         // hide RecognizeFragment here
     }
 
     @Override
     public void onBeginningOfSpeech() {
-        Log.e("onBeginningOfSpeech", "Start recognition");
+        Log.d("onBeginningOfSpeech", "Start recognition");
     }
 
     /**
@@ -203,7 +210,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
      */
     @Override
     public void onEndOfSpeech() {
-        Log.e("onEndOfSpeech", "End search");
+        Log.d("onEndOfSpeech", "End search");
         if (recognizer.getSearchName().equals(PHRASE_SEARCH)) {
             switchSearch(KWS_SEARCH);
             // hide RecognizeFragment here
@@ -225,7 +232,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             // show RecognizeFragment here
 
         }
-        Log.e("onPartialResult", text);
+        Log.d("onPartialResult", text);
     }
 
     /**
@@ -235,9 +242,9 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
             String strText = hypothesis.getHypstr();
-            Log.e("onResult", strText);
+            textViewCommand.setText(strText.toCharArray(), 0, strText.length());
+            Log.d("onResult", strText);
             if (arguments.contains(strText)) { // necessary until not all phrases in car.gram implemented
-                textViewCommand.setText(strText.toCharArray(), 0, strText.length());
                 videoViewFragmentRecognize.setVideoURI(Uri.parse("android.resource://" + Objects.requireNonNull(getActivity()).getPackageName() + "/" + video.get(arguments.indexOf(strText))));
                 videoViewFragmentRecognize.requestFocus(0);
                 videoViewFragmentRecognize.start();
@@ -267,9 +274,13 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         @Override
         protected void onPostExecute(Exception result) {
             if (result != null) {
+                Toast.makeText(Objects.requireNonNull(activityReference.get().getActivity()).getApplicationContext(), Objects.requireNonNull(result.getLocalizedMessage()), Toast.LENGTH_LONG).show();
                 Log.e("onPostExecute", "Failed to init recognizer");
+                Log.e("onPostExecute", Objects.requireNonNull(result.getMessage()));
+                Log.d("onPostExecute", Arrays.toString(Objects.requireNonNull(result.getStackTrace())));
             } else {
                 activityReference.get().switchSearch(KWS_SEARCH);
+                activityReference.get().getView().findViewById(R.id.recognizeStartbutton).setEnabled(true);
             }
         }
     }
