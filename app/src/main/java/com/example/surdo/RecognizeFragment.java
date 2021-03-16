@@ -30,6 +30,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.surdo.db.AppDatabase;
 import com.example.surdo.db.Command;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
@@ -65,7 +66,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         View view = inflater.inflate(R.layout.fragment_recognize, container, false);
         videoViewFragmentRecognize = view.findViewById(R.id.videoViewFragmentRecognize);
         Button backButton = view.findViewById(R.id.buttonBackToMain);
-        Button recognizeStart = view.findViewById(R.id.recognizeStartbutton);
+        FloatingActionButton recognizeStart = view.findViewById(R.id.recognizeStartbutton);
         textViewCommand = view.findViewById(R.id.textViewCommand);
 
         database = ((MainActivity) Objects.requireNonNull(getActivity())).getDatabase();
