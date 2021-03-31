@@ -19,8 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
@@ -47,14 +49,15 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private static final String KEYPHRASE = "активировать";
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String PHRASE_SEARCH = "phrase";
-    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
-    List<String> arguments;
-    List<Integer> video;
-    private VideoView videoViewFragmentRecognize;
-    private TextView textViewCommand;
     private SpeechRecognizer recognizer;
     private int permissionCheck;
-    AppDatabase database;
+    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+    private List<String> arguments;
+    private List<Integer> video;
+    private TextView textViewCommand;
+
+    private AppDatabase database;
+    private MultipleVideoView videoViewFragmentRecognize;
 
     public RecognizeFragment() {
         // Required empty public constructor
@@ -66,7 +69,8 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_recognize, container, false);
-        videoViewFragmentRecognize = view.findViewById(R.id.videoViewFragmentRecognize);
+        videoViewFragmentRecognize = new MultipleVideoView(view.findViewById(R.id.videoViewFragmentRecognize));
+
         Button backButton = view.findViewById(R.id.buttonBackToMain);
         FloatingActionButton recognizeStart = view.findViewById(R.id.recognizeStartbutton);
         textViewCommand = view.findViewById(R.id.textViewCommand);
@@ -91,7 +95,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 commit());
 
         recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
-
         return view;
     }
 
@@ -244,9 +247,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             textViewCommand.setText(strText.toCharArray(), 0, strText.length());
             Log.d("onResult", strText);
             if (arguments.contains(strText)) { // necessary until not all phrases in car.gram implemented
-                videoViewFragmentRecognize.setVideoURI(Uri.parse("android.resource://" + Objects.requireNonNull(getActivity()).getPackageName() + "/" + video.get(arguments.indexOf(strText))));
-                videoViewFragmentRecognize.requestFocus(0);
-                videoViewFragmentRecognize.start();
+                videoViewFragmentRecognize.addVideo(Uri.parse("android.resource://" + Objects.requireNonNull(getActivity()).getPackageName() + "/" + video.get(arguments.indexOf(strText))));
             }
         }
     }
