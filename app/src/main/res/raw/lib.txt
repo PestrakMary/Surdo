@@ -8,7 +8,7 @@
 быстрее, faster
 быстро, fast
 нажми газ, press_the_gas
-до перекрестка, to_the_crossroads
+до перекрёстка, to_the_crossroads
 дорога, road
 едем прямо, going_straight
 задний ход, reverse
@@ -16,22 +16,22 @@
 можно, can
 начинаем движение, start_moving
 нельзя, must_not
-необозначенный перекресток, unmarked_intersection
-нерегулируемый перекресток, unregulated_intersection
+необозначенный перекрёсток, unmarked_intersection
+нерегулируемый перекрёсток, unregulated_intersection
 не сдал, did_not_pass
 не торопись, do_not_rush
 нужно, need
-обозначенный перекресток, designated_intersection
+обозначенный перекрёсток, designated_intersection
 перестроение, lane_change
 пешеходный переход, crosswalk
 подними сцепление, lift_the_clutch
 помедленнее, slow_down
-после перекрестка, after_the_crossroads
+после перекрёстка, after_the_crossroads
 выключи правый поворотник, turn_off_the_right_turn_signal
 притормози, slow_down_1
 разворот, reversal
 разрешено, allowed
-регулируемый перекресток, regulated_intersection
+регулируемый перекрёсток, regulated_intersection
 светофор, traffic_light
 сдал, passed
 смотри на дорогу, look_at_the_road

@@ -1,3 +1,5 @@
+import java.nio.file.Paths
+
 apply plugin: 'com.android.application'
 
 android {
@@ -37,6 +39,35 @@ dependencies {
     annotationProcessor 'android.arch.persistence.room:compiler:1.1.1'
 }
 
+task buildGram() {
+    println 'buildGram is in building'
+    def lib = file(Paths.get(android.sourceSets.main.res.srcDirs[0].toString(), 'raw', 'lib.txt')).collect() { line ->
+        line.split(", ", 2)[0]
+    }
+    def assetsDir = android.sourceSets.main.assets.srcDirs[0].toString()
+    def dictWords = file(Paths.get(assetsDir, 'sync', 'car.dict')).collect() { line ->
+        line.split(" ", 2)[0]
+    }
+    lib.each { command ->
+        command.split(' ').each { word ->
+            if (!dictWords.contains(word)) {
+                throw new Exception("car.dict does not contain word ${word}, but lib.txt does")
+            }
+        }
+    }
+    def gram = file(Paths.get(assetsDir, 'sync', 'car.gram'))
+    gram.text = """#JSGF V1.0;
+
+grammar car;
+
+<item> = (${lib.join(") | (")});
+
+public <command> = ( <item> ) + ;
+"""
+}
+
 ant.importBuild 'assets.xml'
+list.dependsOn(buildGram)
+checksum.dependsOn(buildGram)
 preBuild.dependsOn(list, checksum)
 clean.dependsOn(clean_assets)
