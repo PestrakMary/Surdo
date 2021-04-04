@@ -1,6 +1,5 @@
 *.iml
 .gradle
-!app/build.gradle
 app/src/main/assets/sync/car.gram
 /local.properties
 /.idea
@@ -9,4 +8,4 @@ app/src/main/assets/sync/car.gram
 /captures
 .externalNativeBuild
 .cxx
-/pocketsphinx-android-5prealpha-release/
+/pocketsphinx-android-5prealpha-release/build
