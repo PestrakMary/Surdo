@@ -14,16 +14,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Queue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
@@ -51,6 +50,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String PHRASE_SEARCH = "phrase";
     private SpeechRecognizer recognizer;
+    private Pattern splitter;
     private int permissionCheck;
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
     private List<String> arguments;
@@ -143,6 +143,15 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
         File menuGrammar = new File(assetsDir, "car.gram");
         Log.d("File", menuGrammar.getAbsolutePath());
+        StringBuilder sb = new StringBuilder("((?<=^| )(?:(?:");
+        for (int i = 0; i < arguments.size(); i++) {
+            sb.append(arguments.get(i));
+            if (i < arguments.size() - 1) {
+                sb.append(")|(?:");
+            }
+        }
+        sb.append("))(?=$| ))+");
+        splitter = Pattern.compile(sb.toString());
         recognizer.addGrammarSearch(PHRASE_SEARCH, menuGrammar);
     }
 
@@ -248,8 +257,12 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             String strText = hypothesis.getHypstr();
             textViewCommand.setText(strText.toCharArray(), 0, strText.length());
             Log.d("onResult", strText);
-            if (arguments.contains(strText)) { // necessary until not all phrases in car.gram implemented
-                videoViewFragmentRecognize.addVideo(Uri.parse("android.resource://" + Objects.requireNonNull(getActivity()).getPackageName() + "/" + video.get(arguments.indexOf(strText))));
+            Matcher matcher = splitter.matcher(strText);
+            while (matcher.find()) {
+                String s = strText.substring(matcher.start(), matcher.end());
+                if (arguments.contains(s)) { // necessary until not all phrases in car.gram implemented
+                    videoViewFragmentRecognize.addVideo(Uri.parse("android.resource://" + Objects.requireNonNull(getActivity()).getPackageName() + "/" + video.get(arguments.indexOf(s))));
+                }
             }
         }
     }
