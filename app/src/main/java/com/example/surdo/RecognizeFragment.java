@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -73,6 +74,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
         Button backButton = view.findViewById(R.id.buttonBackToMain);
         FloatingActionButton recognizeStart = view.findViewById(R.id.recognizeStartbutton);
+        recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewCommand = view.findViewById(R.id.textViewCommand);
 
         database = ((MainActivity) Objects.requireNonNull(getActivity())).getDatabase();
