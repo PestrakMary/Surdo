@@ -15,16 +15,12 @@ public class MultipleVideoView {
         this.videoView = videoView;
         finished = true;
         videosQueue = new LinkedList<>();
-        videoView.setOnCompletionListener(mp -> {
-            startNext();
-        });
+        videoView.setOnCompletionListener(mp -> startNext());
     }
 
     private void startNext() {
-        Uri video;
-        synchronized (videosQueue) {
-            video = videosQueue.poll();
-        }
+        Uri video = videosQueue.poll();
+        ;
         if (video != null) {
             finished = false;
             videoView.setVideoURI(video);
@@ -36,9 +32,7 @@ public class MultipleVideoView {
     }
 
     public void addVideo(Uri video) {
-        synchronized (videosQueue) {
-            videosQueue.add(video);
-        }
+        videosQueue.add(video);
         if (finished) {
             startNext();
         }
