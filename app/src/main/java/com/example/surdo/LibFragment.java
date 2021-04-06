@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
@@ -35,7 +36,6 @@ public class LibFragment extends Fragment {
         // Required empty public constructor
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -44,19 +44,6 @@ public class LibFragment extends Fragment {
         ListView listViewFragmentLib = view.findViewById(R.id.listViewFragmentLib);
         videoViewFragmentLib = view.findViewById(R.id.videoViewFragmentLib);
         Button backButton = view.findViewById(R.id.buttonBackToHome);
-
-        database = ((MainActivity) Objects.requireNonNull(getActivity())).getDatabase();
-
-        arguments = database.CommandDao().
-                getAll().
-                stream().
-                map(Command::getWord).
-                collect(Collectors.toList());
-        video = database.CommandDao().
-                getAll().
-                stream().
-                map(Command::getPath).
-                collect(Collectors.toList());
 
         listViewFragmentLib.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, arguments));
         listViewFragmentLib.setOnItemClickListener((parent, itemClicked, position, id) -> {
@@ -73,5 +60,23 @@ public class LibFragment extends Fragment {
                 commit());
 
         return view;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        database = ((MainActivity) Objects.requireNonNull(getActivity())).getDatabase();
+
+        arguments = database.CommandDao().
+                getAll().
+                stream().
+                map(Command::getWord).
+                collect(Collectors.toList());
+        video = database.CommandDao().
+                getAll().
+                stream().
+                map(Command::getPath).
+                collect(Collectors.toList());
     }
 }

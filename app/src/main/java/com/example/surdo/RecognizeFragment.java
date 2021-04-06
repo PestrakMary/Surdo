@@ -64,7 +64,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         // Required empty public constructor
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -77,6 +76,22 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewCommand = view.findViewById(R.id.textViewCommand);
 
+        backButton.setOnClickListener(v -> Objects.requireNonNull(getFragmentManager()).
+                beginTransaction().
+                replace(R.id.fragmentContainer,
+                        ((MainActivity) Objects.requireNonNull(getActivity())).getLibFragment()).
+                commit());
+
+        recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
+        return view;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // get permissions
+        permissionCheck = ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()).getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         database = ((MainActivity) Objects.requireNonNull(getActivity())).getDatabase();
 
         arguments = database.CommandDao().
@@ -89,22 +104,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 stream().
                 map(Command::getPath).
                 collect(Collectors.toList());
-
-        backButton.setOnClickListener(v -> Objects.requireNonNull(getFragmentManager()).
-                beginTransaction().
-                replace(R.id.fragmentContainer,
-                        ((MainActivity) Objects.requireNonNull(getActivity())).getLibFragment()).
-                commit());
-
-        recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
-        return view;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // get permissions
-        permissionCheck = ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()).getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         startSetup();
     }
 
