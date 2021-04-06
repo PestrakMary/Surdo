@@ -59,13 +59,14 @@ public class MainActivity extends AppCompatActivity {
 
         FragmentManager fm = getSupportFragmentManager();
         recognizeFragment = (RecognizeFragment) fm.findFragmentById(R.id.fragmentContainer);
-        libFragment = (LibFragment) fm.findFragmentById(R.id.fragmentContainer);
         if (recognizeFragment == null) {
             recognizeFragment = new RecognizeFragment();
             fm.beginTransaction()
                     .add(R.id.fragmentContainer, recognizeFragment)
+                    .addToBackStack(null)
                     .commit();
         }
+        libFragment = (LibFragment) fm.findFragmentById(R.id.listViewFragmentLib);
     }
 
     public LibFragment getLibFragment() {

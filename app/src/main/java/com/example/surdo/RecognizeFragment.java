@@ -75,12 +75,14 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         FloatingActionButton recognizeStart = view.findViewById(R.id.recognizeStartbutton);
         recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewCommand = view.findViewById(R.id.textViewCommand);
+       // videoViewFragmentRecognize = view.findViewById(R.id.videoViewFragmentRecognize);
 
         backButton.setOnClickListener(v -> Objects.requireNonNull(getFragmentManager()).
                 beginTransaction().
                 replace(R.id.fragmentContainer,
-                        ((MainActivity) Objects.requireNonNull(getActivity())).getLibFragment()).
-                commit());
+                        ((MainActivity) Objects.requireNonNull(getActivity())).getLibFragment())
+                .addToBackStack(null)
+                .commit());
 
         recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
         return view;

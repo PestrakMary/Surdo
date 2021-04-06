@@ -56,8 +56,9 @@ public class LibFragment extends Fragment {
         backButton.setOnClickListener(v -> Objects.requireNonNull(getFragmentManager()).
                 beginTransaction().
                 replace(R.id.fragmentContainer, ((MainActivity) Objects.requireNonNull(getActivity())).
-                        getRecognizeFragment()).
-                commit());
+                        getRecognizeFragment())
+                .addToBackStack(null)
+                .commit());
 
         return view;
     }
