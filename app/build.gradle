@@ -1,3 +1,6 @@
+import org.gradle.work.Incremental
+
+import javax.inject.Inject
 import java.nio.file.Paths
 
 apply plugin: 'com.android.application'
@@ -39,31 +42,50 @@ dependencies {
     annotationProcessor 'android.arch.persistence.room:compiler:1.1.1'
 }
 
-task buildGram() {
-    println 'buildGram is in building'
-    def lib = file(Paths.get(android.sourceSets.main.res.srcDirs[0].toString(), 'raw', 'lib.txt')).collect() { line ->
-        line.split(", ", 2)[0]
-    }
-    def assetsDir = android.sourceSets.main.assets.srcDirs[0].toString()
-    def dictWords = file(Paths.get(assetsDir, 'sync', 'car.dict')).collect() { line ->
-        line.split(" ", 2)[0]
-    }
-    lib.each { command ->
-        command.split(' ').each { word ->
-            if (!dictWords.contains(word)) {
-                throw new Exception("car.dict does not contain word ${word}, but lib.txt does")
+abstract class BuildGramTask extends DefaultTask {
+    @Incremental
+    @InputFile
+    abstract RegularFileProperty getLib();
+
+    @Incremental
+    @InputFile
+    abstract RegularFileProperty getDict();
+
+    @OutputFile
+    abstract RegularFileProperty getGram();
+
+    @TaskAction
+    void execute() {
+        println 'buildGram is in building'
+        def libCommands = lib.get().asFile.collect() { line ->
+            line.split(", ", 2)[0]
+        }
+        def dictWords = dict.get().asFile.collect() { line ->
+            line.split(" ", 2)[0]
+        }
+        libCommands.each { command ->
+            command.split(' ').each { word ->
+                if (!dictWords.contains(word)) {
+                    throw new Exception("car.dict does not contain word ${word}, but lib.txt does")
+                }
             }
         }
-    }
-    def gram = file(Paths.get(assetsDir, 'sync', 'car.gram'))
-    gram.text = """#JSGF V1.0;
+        gram.get().asFile.text = """#JSGF V1.0;
 
 grammar car;
 
-<item> = (${lib.join(") | (")});
+<item> = (${libCommands.join(") | (")});
 
 public <command> = ( <item> ) + ;
 """
+    }
+}
+
+task buildGram(type: BuildGramTask) {
+    def assetsDir = android.sourceSets.main.assets.srcDirs[0].toString()
+    lib = file(Paths.get(android.sourceSets.main.res.srcDirs[0].toString(), 'raw', 'lib.txt'))
+    dict = file(Paths.get(assetsDir, 'sync', 'car.dict').toString())
+    gram = file(Paths.get(assetsDir, 'sync', 'car.gram').toString())
 }
 
 ant.importBuild 'assets.xml'
