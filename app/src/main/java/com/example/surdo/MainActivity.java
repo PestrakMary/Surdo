@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                     .addToBackStack(null)
                     .commit();
         }
-        libFragment = (LibFragment) fm.findFragmentById(R.id.listViewFragmentLib);
+        libFragment = (LibFragment) fm.findFragmentById(R.id.fragmentContainer);
     }
 
     public LibFragment getLibFragment() {
