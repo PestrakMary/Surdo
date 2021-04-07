@@ -1,4 +1,4 @@
-package com.example.surdo;
+package by.surdoteam.surdo;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals("com.example.surdo", appContext.getPackageName());
+        assertEquals("by.surdoteam.surdo", appContext.getPackageName());
     }
 }

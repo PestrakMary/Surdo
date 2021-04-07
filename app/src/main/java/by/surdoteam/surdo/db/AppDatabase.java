@@ -1,4 +1,4 @@
-package com.example.surdo.db;
+package by.surdoteam.surdo.db;
 
 import androidx.room.Database;
 import androidx.room.RoomDatabase;

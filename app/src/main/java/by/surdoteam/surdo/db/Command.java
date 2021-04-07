@@ -1,4 +1,4 @@
-package com.example.surdo.db;
+package by.surdoteam.surdo.db;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;

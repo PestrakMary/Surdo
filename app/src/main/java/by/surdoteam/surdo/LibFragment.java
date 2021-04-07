@@ -1,4 +1,4 @@
-package com.example.surdo;
+package by.surdoteam.surdo;
 
 import android.net.Uri;
 import android.os.Build;
@@ -18,8 +18,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
-import com.example.surdo.db.AppDatabase;
-import com.example.surdo.db.Command;
+import by.surdoteam.surdo.db.AppDatabase;
+import by.surdoteam.surdo.db.Command;
 
 import java.util.List;
 import java.util.Objects;

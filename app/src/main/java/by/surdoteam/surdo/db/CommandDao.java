@@ -1,4 +1,4 @@
-package com.example.surdo.db;
+package by.surdoteam.surdo.db;
 
 import androidx.room.Dao;
 import androidx.room.Delete;

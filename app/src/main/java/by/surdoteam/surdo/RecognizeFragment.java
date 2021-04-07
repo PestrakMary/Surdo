@@ -1,4 +1,4 @@
-package com.example.surdo;
+package by.surdoteam.surdo;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -32,8 +32,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.example.surdo.db.AppDatabase;
-import com.example.surdo.db.Command;
+import by.surdoteam.surdo.db.AppDatabase;
+import by.surdoteam.surdo.db.Command;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import edu.cmu.pocketsphinx.Assets;

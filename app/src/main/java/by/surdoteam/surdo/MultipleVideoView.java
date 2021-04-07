@@ -1,4 +1,4 @@
-package com.example.surdo;
+package by.surdoteam.surdo;
 
 import android.net.Uri;
 import android.widget.VideoView;
