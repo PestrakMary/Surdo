@@ -34,6 +34,7 @@ import androidx.fragment.app.Fragment;
 
 import by.surdoteam.surdo.db.AppDatabase;
 import by.surdoteam.surdo.db.Command;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import edu.cmu.pocketsphinx.Assets;
@@ -178,6 +179,23 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         if (recognizer != null) {
             recognizer.cancel();
             recognizer.shutdown();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        videoViewFragmentRecognize.reset();
+        if (recognizer != null) {
+            recognizer.cancel();
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (recognizer != null) {
+            switchSearch(KWS_SEARCH);
         }
     }
 

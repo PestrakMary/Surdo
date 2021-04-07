@@ -20,7 +20,6 @@ public class MultipleVideoView {
 
     private void startNext() {
         Uri video = videosQueue.poll();
-        ;
         if (video != null) {
             finished = false;
             videoView.setVideoURI(video);
@@ -36,5 +35,11 @@ public class MultipleVideoView {
         if (finished) {
             startNext();
         }
+    }
+
+    public void reset() {
+        videoView.stopPlayback();
+        videosQueue.clear();
+        finished = true;
     }
 }
