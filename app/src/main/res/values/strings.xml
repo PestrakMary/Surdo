@@ -2,5 +2,13 @@
     <string name="app_name">Surdo</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="about">О приложении</string>
+    <string name="library">Библиотека</string>
+    <string name="prompt_command">Здесь будет отображаться ваша голосовая команда</string>
+    <string name="settings">Настройки</string>
+    <string name="sensitivity_of_the_activation_phrase">Чувствительность активационной фразы:</string>
+    <string name="grammar_name">Название грамматики:</string>
+    <string name="advanced_settings_for_developers">Расширенные настройки для разработчиков:</string>
+    <string name="save_logs">Сохранять логи</string>
+    <string name="recognizer">Переводчик</string>
 </resources>

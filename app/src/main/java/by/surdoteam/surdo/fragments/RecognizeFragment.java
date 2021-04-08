@@ -1,4 +1,4 @@
-package by.surdoteam.surdo;
+package by.surdoteam.surdo.fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,10 +27,12 @@ import java.util.stream.Collectors;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import by.surdoteam.surdo.MainActivity;
+import by.surdoteam.surdo.MultipleVideoView;
+import by.surdoteam.surdo.R;
 import by.surdoteam.surdo.db.AppDatabase;
 import by.surdoteam.surdo.db.Command;
 
@@ -58,31 +59,20 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private List<Integer> video;
     private TextView textViewCommand;
 
-    private AppDatabase database;
     private MultipleVideoView videoViewFragmentRecognize;
 
     public RecognizeFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_recognize, container, false);
         videoViewFragmentRecognize = new MultipleVideoView(view.findViewById(R.id.videoViewFragmentRecognize));
 
-        Button backButton = view.findViewById(R.id.buttonBackToMain);
         FloatingActionButton recognizeStart = view.findViewById(R.id.recognizeStartbutton);
         recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewCommand = view.findViewById(R.id.textViewCommand);
-
-        backButton.setOnClickListener(v -> Objects.requireNonNull(getFragmentManager()).
-                beginTransaction().
-                replace(R.id.fragmentContainer,
-                        ((MainActivity) Objects.requireNonNull(getActivity())).getLibFragment())
-                .addToBackStack(null)
-                .commit());
 
         recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
         return view;
@@ -94,7 +84,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         super.onCreate(savedInstanceState);
         // get permissions
         permissionCheck = ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()).getApplicationContext(), Manifest.permission.RECORD_AUDIO);
-        database = ((MainActivity) Objects.requireNonNull(getActivity())).getDatabase();
+        AppDatabase database = ((MainActivity) Objects.requireNonNull(getActivity())).getDatabase();
 
         arguments = database.CommandDao().
                 getAll().
@@ -111,7 +101,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     private void startSetup() {
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(Objects.requireNonNull(getActivity()), new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
             return;
         }
         // Recognizer initialization is a time-consuming and it involves IO,
