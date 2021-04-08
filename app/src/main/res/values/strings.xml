@@ -11,4 +11,16 @@
     <string name="advanced_settings_for_developers">Расширенные настройки для разработчиков:</string>
     <string name="save_logs">Сохранять логи</string>
     <string name="recognizer">Переводчик</string>
+    <string name="name"><p><font size="24"><b>Surdo</b></font></p></string>
+    <string name="version"><p><font size="24"><b><p><font color="grey">Версия v0.4.1</font></p></b></font></p></string>
+    <string name="about_text">
+        <p>Приложение для перевода голосовых команд в язык жестов.</p>
+        <p>Эта программа лицензирована по MIT.</p>
+        <p>Исходный код доступен на <a href = "https://github.com/PestrakMary/Surdo">GitHub</a>.</p>
+    </string>
+    <string name="mentioning"><div>Icons made by <a href="https://www.flaticon.com/authors/vitaly-gorbachev"
+        title="Vitaly Gorbachev">Vitaly Gorbachev</a>
+            from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+        <p>Icons by <a href = "https://icons8.com">Icons8</a></p>
+    </string>
 </resources>
