@@ -1,6 +1,5 @@
 import org.gradle.work.Incremental
 
-import javax.inject.Inject
 import java.nio.file.Paths
 
 apply plugin: 'com.android.application'
@@ -13,7 +12,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 29
         versionCode 1
-        versionName "1.0"
+        versionName "0.4.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -70,14 +69,14 @@ abstract class BuildGramTask extends DefaultTask {
                 }
             }
         }
-        gram.get().asFile.text = """#JSGF V1.0;
+        gram.get().asFile.write("""#JSGF V1.0;
 
 grammar car;
 
 <item> = (${libCommands.join(") | (")});
 
 public <command> = ( <item> ) + ;
-"""
+""",'utf-8')
     }
 }
 
