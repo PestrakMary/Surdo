@@ -1,6 +1,8 @@
 package by.surdoteam.surdo;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
@@ -64,41 +66,41 @@ public class MainActivity extends AppCompatActivity {
                 setNavigationItemSelectedListener
                         (menuItem -> {
                             int id = menuItem.getItemId();
-                            switch (id) {
-                                case R.id.recognizer_settings:
-                                    getSupportFragmentManager().
-                                            beginTransaction().
-                                            replace(R.id.fragmentContainer,
-                                                    getRecognizeFragment())
-                                            .addToBackStack(null)
-                                            .commit();
-                                    return true;
-                                case R.id.library_settings:
-                                    getSupportFragmentManager().
-                                            beginTransaction().
-                                            replace(R.id.fragmentContainer,
-                                                    getLibFragment())
-                                            .addToBackStack(null)
-                                            .commit();
-                                    return true;
-                                case R.id.action_settings:
-                                    getSupportFragmentManager().
-                                            beginTransaction().
-                                            replace(R.id.fragmentContainer,
-                                                    getSettingsFragment())
-                                            .addToBackStack(null)
-                                            .commit();
-                                    return true;
-                                case R.id.about_settings:
-                                    getSupportFragmentManager().
-                                            beginTransaction().
-                                            replace(R.id.fragmentContainer,
-                                                    getAboutFragment())
-                                            .addToBackStack(null)
-                                            .commit();
-                                    return true;
+                            if (id == R.id.recognizer_settings) {
+                                getSupportFragmentManager().
+                                        beginTransaction().
+                                        replace(R.id.fragmentContainer,
+                                                getRecognizeFragment())
+                                        .addToBackStack(null)
+                                        .commit();
+                            } else if (id == R.id.library_settings) {
+                                getSupportFragmentManager().
+                                        beginTransaction().
+                                        replace(R.id.fragmentContainer,
+                                                getLibFragment())
+                                        .addToBackStack(null)
+                                        .commit();
+                            } else if (id == R.id.action_settings) {
+                                getSupportFragmentManager().
+                                        beginTransaction().
+                                        replace(R.id.fragmentContainer,
+                                                getSettingsFragment())
+                                        .addToBackStack(null)
+                                        .commit();
+                            } else if (id == R.id.about_settings) {
+                                getSupportFragmentManager().
+                                        beginTransaction().
+                                        replace(R.id.fragmentContainer,
+                                                getAboutFragment())
+                                        .addToBackStack(null)
+                                        .commit();
+                            } else {
+                                return false;
                             }
-                            return false;
+                            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+                            drawer.closeDrawer(GravityCompat.START, true);
+                            return true;
                         });
 
         readLibrary();
