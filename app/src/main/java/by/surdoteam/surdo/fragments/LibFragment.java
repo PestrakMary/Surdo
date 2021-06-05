@@ -14,7 +14,6 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import by.surdoteam.surdo.MainActivity;
@@ -54,7 +53,6 @@ public class LibFragment extends Fragment {
         return view;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

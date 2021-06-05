@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import by.surdoteam.surdo.R;
@@ -23,7 +22,6 @@ public class AboutFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_about, container, false);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

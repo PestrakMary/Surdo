@@ -36,7 +36,6 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
