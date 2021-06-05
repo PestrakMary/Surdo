@@ -50,7 +50,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private static final String KEYPHRASE = "активировать";
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String PHRASE_SEARCH = "phrase";
-    private static String grammar_name;
     private SpeechRecognizer recognizer;
     private Pattern splitter;
     private int permissionCheck;
@@ -58,6 +57,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private List<String> arguments;
     private List<Integer> video;
     private TextView textViewCommand;
+    private FloatingActionButton recognizeStart;
 
     private MultipleVideoView videoViewFragmentRecognize;
 
@@ -70,11 +70,17 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         View view = inflater.inflate(R.layout.fragment_recognize, container, false);
         videoViewFragmentRecognize = new MultipleVideoView(view.findViewById(R.id.videoViewFragmentRecognize));
 
-        FloatingActionButton recognizeStart = view.findViewById(R.id.recognizeStartbutton);
+        recognizeStart = view.findViewById(R.id.recognizeStartbutton);
         recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewCommand = view.findViewById(R.id.textViewCommand);
 
-        recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            recognizeStart.setOnClickListener(view1 -> requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO));
+            recognizeStart.setEnabled(true);
+//            recognizeStart.setImageResource(android.R.drawable.ic_lock_silent_mode);
+        } else {
+            recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
+        }
         return view;
     }
 
@@ -100,7 +106,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     private void startSetup() {
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
             return;
         }
         // Recognizer initialization is a time-consuming and it involves IO,
@@ -113,7 +118,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         // of different kind and switch between them
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         int threshold = sharedPref.getInt("sensitivity_of_the_activation_phrase", 6);
-        grammar_name = sharedPref.getString("grammar_name", getString(R.string.grammar_name_default_value));
+        String grammar_name = sharedPref.getString("grammar_name", getString(R.string.grammar_name_default_value));
         SpeechRecognizerSetup setup = SpeechRecognizerSetup.defaultSetup()
                 .setAcousticModel(new File(assetsDir, "ru-ru-ptm"))
                 .setDictionary(new File(assetsDir, "car.dict"))
@@ -158,9 +163,10 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 // Recognizer initialization is a time-consuming and it involves IO,
                 // so we execute it in async task
                 permissionCheck = PackageManager.PERMISSION_GRANTED;
+                recognizeStart.setEnabled(false);
+                recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
+//                recognizeStart.setImageResource(android.R.drawable.ic_btn_speak_now);
                 new SetupTask(this).execute();
-            } else {
-                requireFragmentManager().beginTransaction().remove(RecognizeFragment.this).commit();
             }
         }
     }
