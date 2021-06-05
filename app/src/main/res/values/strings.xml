@@ -9,7 +9,7 @@
     <string name="sensitivity_of_the_activation_phrase">Чувствительность</string>
     <string name="sensitivity_of_the_activation_phrase_summary">Чувствительность распознавания активационной фразы</string>
     <string name="grammar_name">Грамматика</string>
-    <string name="grammar_name_summary">Выбор грамматики, используемой для распознавания</string>
+    <string name="grammar_name_summary">Выбор грамматики, используемой для распознавания. "Long" означает возможность распознавания нескольких фраз подряд</string>
     <string name="save_logs">Сохранять логи</string>
     <string name="save_logs_summary">Активировать сохранение логов распознавания. Занимает много места на устройстве!</string>
 

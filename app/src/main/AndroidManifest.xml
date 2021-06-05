@@ -2,11 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="by.surdoteam.surdo">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--    is't required since API 19 for app dirs like-->
+    <!--     Context.getExternalCacheDir() -> /storage/emulated/0/Android/data/by.surdoteam.surdo/cache -->
+    <!--    Context.getExternalFilesDir(String) /storage/emulated/0/Android/data/by.surdoteam.surdo/files/String -->
+    <!--    and our case-->
+    <!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
-            android:requestLegacyExternalStorage="true"
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"

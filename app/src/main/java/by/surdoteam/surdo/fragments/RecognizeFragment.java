@@ -50,6 +50,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private static final String KEYPHRASE = "активировать";
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String PHRASE_SEARCH = "phrase";
+    private static String grammar_name;
     private SpeechRecognizer recognizer;
     private Pattern splitter;
     private int permissionCheck;
@@ -112,10 +113,10 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         // of different kind and switch between them
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         int threshold = sharedPref.getInt("sensitivity_of_the_activation_phrase", 6);
-        String dict = sharedPref.getString("grammar_name", getString(R.string.grammar_name_default_value));
+        grammar_name = sharedPref.getString("grammar_name", getString(R.string.grammar_name_default_value));
         SpeechRecognizerSetup setup = SpeechRecognizerSetup.defaultSetup()
                 .setAcousticModel(new File(assetsDir, "ru-ru-ptm"))
-                .setDictionary(new File(assetsDir, dict))
+                .setDictionary(new File(assetsDir, "car.dict"))
                 .setBoolean("-remove_noise", true)
                 .setSampleRate(8000)
                 .setKeywordThreshold((float) Math.pow(10, -threshold));
@@ -134,8 +135,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
         // Create keyword-activation search.
         recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
-
-        File menuGrammar = new File(assetsDir, "car.gram");
+        File menuGrammar = new File(assetsDir, grammar_name);
         Log.d("File", menuGrammar.getAbsolutePath());
         StringBuilder sb = new StringBuilder("((?<=^| )(?:(?:");
         for (int i = 0; i < arguments.size(); i++) {
