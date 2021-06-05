@@ -15,6 +15,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -25,18 +33,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import by.surdoteam.surdo.db.AppDatabase;
 import by.surdoteam.surdo.db.Command;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -57,6 +55,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private List<String> arguments;
     private List<Integer> video;
     private TextView textViewCommand;
+    private FloatingActionButton recognizeStart;
 
     private AppDatabase database;
     private MultipleVideoView videoViewFragmentRecognize;
@@ -73,7 +72,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         videoViewFragmentRecognize = new MultipleVideoView(view.findViewById(R.id.videoViewFragmentRecognize));
 
         Button backButton = view.findViewById(R.id.buttonBackToMain);
-        FloatingActionButton recognizeStart = view.findViewById(R.id.recognizeStartbutton);
+        recognizeStart = view.findViewById(R.id.recognizeStartbutton);
         recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewCommand = view.findViewById(R.id.textViewCommand);
 
@@ -83,8 +82,13 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                         ((MainActivity) Objects.requireNonNull(getActivity())).getLibFragment())
                 .addToBackStack(null)
                 .commit());
-
-        recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            recognizeStart.setOnClickListener(view1 -> requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO));
+            recognizeStart.setEnabled(true);
+//            recognizeStart.setImageResource(android.R.drawable.ic_lock_silent_mode);
+        } else {
+            recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
+        }
         return view;
     }
 
@@ -111,7 +115,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     private void startSetup() {
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(Objects.requireNonNull(getActivity()), new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO);
             return;
         }
         // Recognizer initialization is a time-consuming and it involves IO,
@@ -165,9 +168,10 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 // Recognizer initialization is a time-consuming and it involves IO,
                 // so we execute it in async task
                 permissionCheck = PackageManager.PERMISSION_GRANTED;
+                recognizeStart.setEnabled(false);
+                recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
+//                recognizeStart.setImageResource(android.R.drawable.ic_btn_speak_now);
                 new SetupTask(this).execute();
-            } else {
-                Objects.requireNonNull(getFragmentManager()).beginTransaction().remove(RecognizeFragment.this).commit();
             }
         }
     }
