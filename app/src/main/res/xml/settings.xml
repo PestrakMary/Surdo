@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:asp="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+            app:key="recognition_category"
+            app:title="@string/recognition_category">
+        <SeekBarPreference
+                android:key="sensitivity_of_the_activation_phrase"
+                android:summary="@string/sensitivity_of_the_activation_phrase_summary"
+                android:title="@string/sensitivity_of_the_activation_phrase"
+                android:max="10"
+                android:defaultValue="6"
+                asp:min="3"
+                android:progress="1"
+                app:showSeekBarValue="true" />
+        <ListPreference
+                android:key="grammar_name"
+                android:summary="@string/grammar_name_summary"
+                android:title="@string/grammar_name"
+                android:entries="@array/grammar_name_names"
+                android:entryValues="@array/grammar_name_values"
+                android:defaultValue="@string/grammar_name_default_value"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+            app:key="debug_category"
+            app:title="@string/debug_category">
+    <CheckBoxPreference
+            android:key="save_logs"
+            android:summary="@string/save_logs_summary"
+            android:title="@string/save_logs"
+            android:defaultValue="false"/>
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,6 +1,7 @@
 *.iml
 .gradle
 app/src/main/assets/sync/car.gram
+app/src/main/assets/sync/car_long.gram
 /local.properties
 /.idea
 .DS_Store

@@ -1,15 +1,22 @@
 <resources>
     <string name="app_name">Surdo</string>
 
-    <string name="about">О приложении</string>
     <string name="library">Библиотека</string>
-    <string name="prompt_command">Здесь будет отображаться ваша голосовая команда</string>
+
     <string name="settings">Настройки</string>
-    <string name="sensitivity_of_the_activation_phrase">Чувствительность активационной фразы:</string>
-    <string name="grammar_name">Название грамматики:</string>
-    <string name="advanced_settings_for_developers">Расширенные настройки для разработчиков:</string>
+    <string name="recognition_category">Распознавание</string>
+    <string name="debug_category">Для разработчиков</string>
+    <string name="sensitivity_of_the_activation_phrase">Чувствительность</string>
+    <string name="sensitivity_of_the_activation_phrase_summary">Чувствительность распознавания активационной фразы</string>
+    <string name="grammar_name">Грамматика</string>
+    <string name="grammar_name_summary">Выбор грамматики, используемой для распознавания</string>
     <string name="save_logs">Сохранять логи</string>
+    <string name="save_logs_summary">Активировать сохранение логов распознавания. Занимает много места на устройстве!</string>
+
     <string name="recognizer">Переводчик</string>
+    <string name="prompt_command">Здесь будет отображаться ваша голосовая команда</string>
+
+    <string name="about">О приложении</string>
     <string name="name"><p><font size="24"><b>Surdo</b></font></p></string>
     <string name="version"><p><font size="24"><b><p><font color="grey">Версия v0.4.1</font></p></b></font></p></string>
     <string name="about_text">
@@ -22,4 +29,5 @@
         <p>and by <a href="https://icons8.com">Icons8</a></p>
     </string>
     <string name="icon_desc">Иконка приложения</string>
+
 </resources>

@@ -1,10 +1,11 @@
 package by.surdoteam.surdo.fragments;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,19 +32,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import by.surdoteam.surdo.MainActivity;
 import by.surdoteam.surdo.MultipleVideoView;
 import by.surdoteam.surdo.R;
 import by.surdoteam.surdo.db.AppDatabase;
 import by.surdoteam.surdo.db.Command;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -81,8 +81,8 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // get permissions
-        permissionCheck = ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()).getApplicationContext(), Manifest.permission.RECORD_AUDIO);
-        AppDatabase database = ((MainActivity) Objects.requireNonNull(getActivity())).getDatabase();
+        permissionCheck = ContextCompat.checkSelfPermission(requireActivity().getApplicationContext(), Manifest.permission.RECORD_AUDIO);
+        AppDatabase database = ((MainActivity) requireActivity()).getDatabase();
 
         arguments = database.CommandDao().
                 getAll().
@@ -110,17 +110,22 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private void setupRecognizer(File assetsDir) throws IOException {
         // The recognizer can be configured to perform multiple searches
         // of different kind and switch between them
-
-        recognizer = SpeechRecognizerSetup.defaultSetup()
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        int threshold = sharedPref.getInt("sensitivity_of_the_activation_phrase", 6);
+        String dict = sharedPref.getString("grammar_name", getString(R.string.grammar_name_default_value));
+        SpeechRecognizerSetup setup = SpeechRecognizerSetup.defaultSetup()
                 .setAcousticModel(new File(assetsDir, "ru-ru-ptm"))
-                .setDictionary(new File(assetsDir, "car.dict"))
+                .setDictionary(new File(assetsDir, dict))
                 .setBoolean("-remove_noise", true)
                 .setSampleRate(8000)
-                .setKeywordThreshold(1e-6f)
+                .setKeywordThreshold((float) Math.pow(10, -threshold));
 
-                //.setRawLogDir(assetsDir) // To disable logging of raw audio comment out this call (takes a lot of space on the device)
+        if (sharedPref.getBoolean("save_logs", false)) {
+            setup.setRawLogDir(assetsDir); // To disable logging of raw audio comment out this call (takes a lot of space on the device)
+        }
 
-                .getRecognizer();
+
+        recognizer = setup.getRecognizer();
         recognizer.addListener(this);
 
         /* In your application you might not need to add all those searches.
@@ -155,7 +160,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 permissionCheck = PackageManager.PERMISSION_GRANTED;
                 new SetupTask(this).execute();
             } else {
-                Objects.requireNonNull(getFragmentManager()).beginTransaction().remove(RecognizeFragment.this).commit();
+                requireFragmentManager().beginTransaction().remove(RecognizeFragment.this).commit();
             }
         }
     }
@@ -194,11 +199,11 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
             if (searchName.equals(KWS_SEARCH)) {
                 recognizer.startListening(searchName);
-                Toast.makeText(Objects.requireNonNull(getActivity()).getApplicationContext(), "Скажите \"активировать\"", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireActivity().getApplicationContext(), "Скажите \"активировать\"", Toast.LENGTH_SHORT).show();
                 Log.d("switchSearch", "Activated");
             } else {
                 recognizer.startListening(searchName, 10000);
-                Toast.makeText(Objects.requireNonNull(getActivity()).getApplicationContext(), "Слушаю", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireActivity().getApplicationContext(), "Слушаю", Toast.LENGTH_SHORT).show();
                 Log.d("switchSearch", "Start listening");
             }
         }
@@ -207,7 +212,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     @Override
     public void onError(Exception error) {
         //вывести, что все плохо в TextView
-        Toast.makeText(Objects.requireNonNull(getActivity()).getApplicationContext(), Objects.requireNonNull(error.getLocalizedMessage()), Toast.LENGTH_LONG).show();
+        Toast.makeText(requireActivity().getApplicationContext(), Objects.requireNonNull(error.getLocalizedMessage()), Toast.LENGTH_LONG).show();
         Log.e("onError", Objects.requireNonNull(error.getMessage()));
         Log.d("onError", Arrays.toString(Objects.requireNonNull(error.getStackTrace())));
     }
@@ -267,7 +272,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             while (matcher.find()) {
                 String s = strText.substring(matcher.start(), matcher.end());
                 if (arguments.contains(s)) { // necessary until not all phrases in car.gram implemented
-                    videoViewFragmentRecognize.addVideo(Uri.parse("android.resource://" + Objects.requireNonNull(getActivity()).getPackageName() + "/" + video.get(arguments.indexOf(s))));
+                    videoViewFragmentRecognize.addVideo(Uri.parse("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(s))));
                 }
             }
         }
@@ -283,7 +288,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         @Override
         protected Exception doInBackground(Void... params) {
             try {
-                Assets assets = new Assets(Objects.requireNonNull(activityReference.get().getActivity()));
+                Assets assets = new Assets(activityReference.get().requireActivity());
                 File assetDir = assets.syncAssets();
                 activityReference.get().setupRecognizer(assetDir);
             } catch (IOException e) {
@@ -295,13 +300,13 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         @Override
         protected void onPostExecute(Exception result) {
             if (result != null) {
-                Toast.makeText(Objects.requireNonNull(activityReference.get().getActivity()).getApplicationContext(), Objects.requireNonNull(result.getLocalizedMessage()), Toast.LENGTH_LONG).show();
+                Toast.makeText(activityReference.get().requireActivity().getApplicationContext(), Objects.requireNonNull(result.getLocalizedMessage()), Toast.LENGTH_LONG).show();
                 Log.e("onPostExecute", "Failed to init recognizer");
                 Log.e("onPostExecute", Objects.requireNonNull(result.getMessage()));
                 Log.d("onPostExecute", Arrays.toString(Objects.requireNonNull(result.getStackTrace())));
             } else {
                 activityReference.get().switchSearch(KWS_SEARCH);
-                Objects.requireNonNull(activityReference.get().getView()).findViewById(R.id.recognizeStartbutton).setEnabled(true);
+                activityReference.get().requireView().findViewById(R.id.recognizeStartbutton).setEnabled(true);
             }
         }
     }
