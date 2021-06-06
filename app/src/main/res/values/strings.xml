@@ -1,6 +1,34 @@
 <resources>
     <string name="app_name">Surdo</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="library">Библиотека</string>
+
+    <string name="settings">Настройки</string>
+    <string name="recognition_category">Распознавание</string>
+    <string name="debug_category">Для разработчиков</string>
+    <string name="sensitivity_of_the_activation_phrase">Чувствительность</string>
+    <string name="sensitivity_of_the_activation_phrase_summary">Чувствительность распознавания активационной фразы</string>
+    <string name="grammar_name">Грамматика</string>
+    <string name="grammar_name_summary">Выбор грамматики, используемой для распознавания. "Long" означает возможность распознавания нескольких фраз подряд</string>
+    <string name="save_logs">Сохранять логи</string>
+    <string name="save_logs_summary">Активировать сохранение логов распознавания. Занимает много места на устройстве!</string>
+    <string name="restart_app">Перезапустите приложение, чтобы применить настройки</string>
+
+    <string name="recognizer">Переводчик</string>
+    <string name="prompt_command">Здесь будет отображаться ваша голосовая команда</string>
+
+    <string name="about">О приложении</string>
+    <string name="name"><p><font size="24"><b>Surdo</b></font></p></string>
+    <string name="version"><p><font size="24"><b><p><font color="grey">Версия v0.4.1</font></p></b></font></p></string>
+    <string name="about_text">
+        <p>Приложение для перевода голосовых команд в язык жестов.</p>
+        <p>Эта программа лицензирована по MIT.</p>
+        <p>Исходный код доступен на <a href="https://github.com/PestrakMary/Surdo">GitHub</a>.</p>
+    </string>
+    <string name="mentioning"><p>Icons made by <a href="https://www.flaticon.com/authors/vitaly-gorbachev" title="Vitaly Gorbachev">Vitaly Gorbachev</a>
+            from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>
+        <p>and by <a href="https://icons8.com">Icons8</a></p>
+    </string>
+    <string name="icon_desc">Иконка приложения</string>
+
 </resources>

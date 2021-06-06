@@ -1,13 +1,23 @@
 package by.surdoteam.surdo;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import androidx.room.Room;
 
+import com.google.android.material.navigation.NavigationView;
+
 import by.surdoteam.surdo.db.AppDatabase;
+import by.surdoteam.surdo.fragments.AboutFragment;
+import by.surdoteam.surdo.fragments.LibFragment;
+import by.surdoteam.surdo.fragments.RecognizeFragment;
+import by.surdoteam.surdo.fragments.SettingsFragment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private AppDatabase database = null;
     private LibFragment libFragment = null;
     private RecognizeFragment recognizeFragment = null;
+    private SettingsFragment settingsFragment = null;
+    private AboutFragment aboutFragment = null;
     private final Map<String, Integer> library = new TreeMap<>();
 
     public AppDatabase getDatabase() {
@@ -49,6 +61,48 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        NavigationView navigationView = findViewById(R.id.navigation);
+        navigationView.
+                setNavigationItemSelectedListener
+                        (menuItem -> {
+                            int id = menuItem.getItemId();
+                            if (id == R.id.recognizer_settings) {
+                                getSupportFragmentManager().
+                                        beginTransaction().
+                                        replace(R.id.fragmentContainer,
+                                                getRecognizeFragment())
+                                        .addToBackStack(null)
+                                        .commit();
+                            } else if (id == R.id.library_settings) {
+                                getSupportFragmentManager().
+                                        beginTransaction().
+                                        replace(R.id.fragmentContainer,
+                                                getLibFragment())
+                                        .addToBackStack(null)
+                                        .commit();
+                            } else if (id == R.id.action_settings) {
+                                getSupportFragmentManager().
+                                        beginTransaction().
+                                        replace(R.id.fragmentContainer,
+                                                getSettingsFragment())
+                                        .addToBackStack(null)
+                                        .commit();
+                            } else if (id == R.id.about_settings) {
+                                getSupportFragmentManager().
+                                        beginTransaction().
+                                        replace(R.id.fragmentContainer,
+                                                getAboutFragment())
+                                        .addToBackStack(null)
+                                        .commit();
+                            } else {
+                                return false;
+                            }
+                            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+                            drawer.closeDrawer(GravityCompat.START, true);
+                            return true;
+                        });
+
         readLibrary();
 
         database = Room.databaseBuilder(getApplicationContext(),
@@ -67,6 +121,54 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
         }
         libFragment = (LibFragment) fm.findFragmentById(R.id.fragmentContainer);
+        settingsFragment = (SettingsFragment) fm.findFragmentById(R.id.fragmentContainer);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.recognizer_settings:
+                getSupportFragmentManager().
+                        beginTransaction().
+                        replace(R.id.fragmentContainer,
+                                getRecognizeFragment())
+                        .addToBackStack(null)
+                        .commit();
+                return true;
+            case R.id.library_settings:
+                getSupportFragmentManager().
+                        beginTransaction().
+                        replace(R.id.fragmentContainer,
+                                getLibFragment())
+                        .addToBackStack(null)
+                        .commit();
+                return true;
+            case R.id.action_settings:
+                getSupportFragmentManager().
+                        beginTransaction().
+                        replace(R.id.fragmentContainer,
+                                getSettingsFragment())
+                        .addToBackStack(null)
+                        .commit();
+                return true;
+            case R.id.about_settings:
+                getSupportFragmentManager().
+                        beginTransaction().
+                        replace(R.id.fragmentContainer,
+                                getAboutFragment())
+                        .addToBackStack(null)
+                        .commit();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public LibFragment getLibFragment() {
@@ -81,5 +183,19 @@ public class MainActivity extends AppCompatActivity {
             recognizeFragment = new RecognizeFragment();
         }
         return recognizeFragment;
+    }
+
+    public AboutFragment getAboutFragment() {
+        if (aboutFragment == null) {
+            aboutFragment = new AboutFragment();
+        }
+        return aboutFragment;
+    }
+
+    public SettingsFragment getSettingsFragment() {
+        if (settingsFragment == null) {
+            settingsFragment = new SettingsFragment();
+        }
+        return settingsFragment;
     }
 }

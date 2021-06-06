@@ -4,15 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
-    <Button
-        android:id="@+id/buttonBackToMain"
-        style="@android:style/Widget.Holo.Button"
+    <TextView
+        android:id="@+id/editTextTextPersonName2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Библиотека"
-        android:textSize="24sp" />
-
+        android:layout_height="32dp"
+        android:background="#FFFFFF"
+        android:ems="10"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="24sp"
+        app:fontFamily="sans-serif"
+        android:text="" />
     <VideoView
         android:id="@+id/videoViewFragmentRecognize"
         android:layout_width="match_parent"
@@ -25,20 +27,19 @@
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:gravity="center_vertical|center_horizontal"
-        android:text="Здесь будет отображаться ваша голосовая команда"
+        android:text="@string/prompt_command"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="24sp"
         app:fontFamily="sans-serif" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/recognizeStartbutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="220dp"
+        android:layout_height="219dp"
         android:layout_gravity="center_vertical|center_horizontal"
         android:layout_margin="@dimen/fab_margin"
         android:gravity="center"
-        app:fabCustomSize="@dimen/design_fab_size"
         android:scaleType="center"
+        app:fabCustomSize="@dimen/design_fab_size"
         app:srcCompat="@android:drawable/ic_btn_speak_now" />
-
 </LinearLayout>
