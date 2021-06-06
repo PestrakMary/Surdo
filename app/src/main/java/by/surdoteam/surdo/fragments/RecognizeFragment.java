@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,6 +59,9 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private List<Integer> video;
     private TextView textViewCommand;
     private FloatingActionButton recognizeStart;
+    private SharedPreferences sharedPref;
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
+    private boolean settingsChanged;
 
     private MultipleVideoView videoViewFragmentRecognize;
 
@@ -87,6 +91,16 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        settingsChanged = false;
+//        cause the preference manager does not currently store a strong reference to the listener
+        listener = (sharedPreferences, key) -> {
+//            Toast.makeText(requireActivity().getApplicationContext(), R.string.restart_app, Toast.LENGTH_LONG).show();
+            if (key.startsWith("rec_")) {
+                settingsChanged = true;
+            }
+        };
+        sharedPref.registerOnSharedPreferenceChangeListener(listener);
         // get permissions
         permissionCheck = ContextCompat.checkSelfPermission(requireActivity().getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         AppDatabase database = ((MainActivity) requireActivity()).getDatabase();
@@ -116,9 +130,11 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private void setupRecognizer(File assetsDir) throws IOException {
         // The recognizer can be configured to perform multiple searches
         // of different kind and switch between them
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        int threshold = sharedPref.getInt("sensitivity_of_the_activation_phrase", 6);
-        String grammar_name = sharedPref.getString("grammar_name", getString(R.string.grammar_name_default_value));
+//        Log.e("Settings", Integer.toString(sharedPref.getInt("rec_sensitivity_of_the_activation_phrase", 6)) + " " +
+//                             sharedPref.getString("rec_grammar_name", getString(R.string.grammar_name_default_value)) + " " +
+//                            Boolean.toString(sharedPref.getBoolean("rec_save_logs", false)));
+        int threshold = sharedPref.getInt("rec_sensitivity_of_the_activation_phrase", 6);
+        String grammar_name = sharedPref.getString("rec_grammar_name", getString(R.string.grammar_name_default_value));
         SpeechRecognizerSetup setup = SpeechRecognizerSetup.defaultSetup()
                 .setAcousticModel(new File(assetsDir, "ru-ru-ptm"))
                 .setDictionary(new File(assetsDir, "car.dict"))
@@ -126,11 +142,9 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 .setSampleRate(8000)
                 .setKeywordThreshold((float) Math.pow(10, -threshold));
 
-        if (sharedPref.getBoolean("save_logs", false)) {
+        if (sharedPref.getBoolean("rec_save_logs", false)) {
             setup.setRawLogDir(assetsDir); // To disable logging of raw audio comment out this call (takes a lot of space on the device)
         }
-
-
         recognizer = setup.getRecognizer();
         recognizer.addListener(this);
 
@@ -194,7 +208,15 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public void onStart() {
         super.onStart();
         if (recognizer != null) {
-            switchSearch(KWS_SEARCH);
+            if (settingsChanged) {
+                recognizeStart.setEnabled(false);
+                settingsChanged = false;
+                recognizer.cancel();
+                recognizer.shutdown();
+                startSetup();
+            } else {
+                switchSearch(KWS_SEARCH);
+            }
         }
     }
 

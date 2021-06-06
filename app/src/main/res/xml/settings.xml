@@ -6,7 +6,7 @@
             app:key="recognition_category"
             app:title="@string/recognition_category">
         <SeekBarPreference
-                android:key="sensitivity_of_the_activation_phrase"
+                android:key="rec_sensitivity_of_the_activation_phrase"
                 android:summary="@string/sensitivity_of_the_activation_phrase_summary"
                 android:title="@string/sensitivity_of_the_activation_phrase"
                 android:max="10"
@@ -15,7 +15,7 @@
                 android:progress="1"
                 app:showSeekBarValue="true" />
         <ListPreference
-                android:key="grammar_name"
+                android:key="rec_grammar_name"
                 android:summary="@string/grammar_name_summary"
                 android:title="@string/grammar_name"
                 android:entries="@array/grammar_name_names"
@@ -26,7 +26,7 @@
             app:key="debug_category"
             app:title="@string/debug_category">
     <CheckBoxPreference
-            android:key="save_logs"
+            android:key="rec_save_logs"
             android:summary="@string/save_logs_summary"
             android:title="@string/save_logs"
             android:defaultValue="false"/>

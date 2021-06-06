@@ -12,6 +12,7 @@
     <string name="grammar_name_summary">Выбор грамматики, используемой для распознавания. "Long" означает возможность распознавания нескольких фраз подряд</string>
     <string name="save_logs">Сохранять логи</string>
     <string name="save_logs_summary">Активировать сохранение логов распознавания. Занимает много места на устройстве!</string>
+    <string name="restart_app">Перезапустите приложение, чтобы применить настройки</string>
 
     <string name="recognizer">Переводчик</string>
     <string name="prompt_command">Здесь будет отображаться ваша голосовая команда</string>
