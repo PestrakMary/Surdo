@@ -9,9 +9,9 @@
                 android:key="rec_sensitivity_of_the_activation_phrase"
                 android:summary="@string/sensitivity_of_the_activation_phrase_summary"
                 android:title="@string/sensitivity_of_the_activation_phrase"
-                android:max="10"
-                android:defaultValue="6"
-                asp:min="3"
+                android:max="@integer/sensitivity_of_the_activation_phrase_max_value"
+                android:defaultValue="@integer/sensitivity_of_the_activation_phrase_default_value"
+                asp:min="@integer/sensitivity_of_the_activation_phrase_min_value"
                 android:progress="1"
                 app:showSeekBarValue="true" />
         <ListPreference

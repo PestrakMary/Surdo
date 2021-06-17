@@ -16,6 +16,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -48,7 +51,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     private static final String KWS_SEARCH = "wakeup";
     /* Keyword we are looking for to activate menu */
-    private static final String KEYPHRASE = "активировать";
+    private String keyphrase;
     /* Named searches allow to quickly reconfigure the decoder */
     private static final String PHRASE_SEARCH = "phrase";
     private SpeechRecognizer recognizer;
@@ -60,6 +63,8 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private TextView textViewCommand;
     private FloatingActionButton recognizeStart;
     private SharedPreferences sharedPref;
+    //    listener must not be converted to local variable as registerOnSharedPreferenceChangeListener
+    //    doesn't create strong link, so local var will be garbage collected
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
     private boolean settingsChanged;
 
@@ -79,9 +84,21 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         textViewCommand = view.findViewById(R.id.textViewCommand);
 
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            recognizeStart.setOnClickListener(view1 -> requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_RECORD_AUDIO));
+            ActivityResultLauncher<String> mPermissionResult = registerForActivityResult(
+                    new ActivityResultContracts.RequestPermission(),
+                    result -> {
+                        if(result) {
+                            // Recognizer initialization is a time-consuming and it involves IO,
+                            // so we execute it in async task
+                            permissionCheck = PackageManager.PERMISSION_GRANTED;
+                            recognizeStart.setEnabled(false);
+                            recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
+                                new SetupTask(this).execute();
+                        }
+                    });
+            recognizeStart.setOnClickListener(view1 -> mPermissionResult.launch(Manifest.permission.RECORD_AUDIO));
             recognizeStart.setEnabled(true);
-//            recognizeStart.setImageResource(android.R.drawable.ic_lock_silent_mode);
+            recognizeStart.setImageResource(R.drawable.microphone_off);
         } else {
             recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
         }
@@ -133,7 +150,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 //        Log.e("Settings", Integer.toString(sharedPref.getInt("rec_sensitivity_of_the_activation_phrase", 6)) + " " +
 //                             sharedPref.getString("rec_grammar_name", getString(R.string.grammar_name_default_value)) + " " +
 //                            Boolean.toString(sharedPref.getBoolean("rec_save_logs", false)));
-        int threshold = sharedPref.getInt("rec_sensitivity_of_the_activation_phrase", 6);
+        int threshold = sharedPref.getInt("rec_sensitivity_of_the_activation_phrase", getResources().getInteger(R.integer.sensitivity_of_the_activation_phrase_default_value));
         String grammar_name = sharedPref.getString("rec_grammar_name", getString(R.string.grammar_name_default_value));
         SpeechRecognizerSetup setup = SpeechRecognizerSetup.defaultSetup()
                 .setAcousticModel(new File(assetsDir, "ru-ru-ptm"))
@@ -153,7 +170,8 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
          */
 
         // Create keyword-activation search.
-        recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
+        keyphrase = getString(R.string.rec_keyphrase);
+        recognizer.addKeyphraseSearch(KWS_SEARCH, keyphrase);
         File menuGrammar = new File(assetsDir, grammar_name);
         Log.d("File", menuGrammar.getAbsolutePath());
         StringBuilder sb = new StringBuilder("((?<=^| )(?:(?:");
@@ -166,23 +184,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         sb.append("))(?=$| ))+");
         splitter = Pattern.compile(sb.toString());
         recognizer.addGrammarSearch(PHRASE_SEARCH, menuGrammar);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSIONS_REQUEST_RECORD_AUDIO) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Recognizer initialization is a time-consuming and it involves IO,
-                // so we execute it in async task
-                permissionCheck = PackageManager.PERMISSION_GRANTED;
-                recognizeStart.setEnabled(false);
-                recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
-//                recognizeStart.setImageResource(android.R.drawable.ic_btn_speak_now);
-                new SetupTask(this).execute();
-            }
-        }
     }
 
     @Override
@@ -227,11 +228,13 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
             if (searchName.equals(KWS_SEARCH)) {
                 recognizer.startListening(searchName);
-                Toast.makeText(requireActivity().getApplicationContext(), "Скажите \"активировать\"", Toast.LENGTH_SHORT).show();
+                recognizeStart.setImageResource(R.drawable.microphone);
+//                Toast.makeText(requireActivity().getApplicationContext(), "Скажите \"активировать\"", Toast.LENGTH_SHORT).show();
                 Log.d("switchSearch", "Activated");
             } else {
-                recognizer.startListening(searchName, 10000);
-                Toast.makeText(requireActivity().getApplicationContext(), "Слушаю", Toast.LENGTH_SHORT).show();
+                recognizer.startListening(searchName, getResources().getInteger(R.integer.rec_timeout));
+                recognizeStart.setImageResource(R.drawable.microphone_on);
+//                Toast.makeText(requireActivity().getApplicationContext(), "Слушаю", Toast.LENGTH_SHORT).show();
                 Log.d("switchSearch", "Start listening");
             }
         }
@@ -279,7 +282,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         if (hypothesis == null)
             return;
         String text = hypothesis.getHypstr();
-        if (text.equals(KEYPHRASE)) {
+        if (text.equals(keyphrase)) {
             switchSearch(PHRASE_SEARCH);
             // show RecognizeFragment here
 

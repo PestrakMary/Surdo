@@ -41,5 +41,5 @@
         android:gravity="center"
         android:scaleType="center"
         app:fabCustomSize="@dimen/design_fab_size"
-        app:srcCompat="@android:drawable/ic_btn_speak_now" />
+        app:srcCompat="@drawable/microphone" />
 </LinearLayout>
