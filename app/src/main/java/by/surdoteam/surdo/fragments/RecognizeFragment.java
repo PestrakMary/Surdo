@@ -147,17 +147,19 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private void setupRecognizer(File assetsDir) throws IOException {
         // The recognizer can be configured to perform multiple searches
         // of different kind and switch between them
-//        Log.e("Settings", Integer.toString(sharedPref.getInt("rec_sensitivity_of_the_activation_phrase", 6)) + " " +
+//        Log.e("Settings", Integer.toString(sharedPref.getInt("rec_kws_threshold", 6)) + " " +
 //                             sharedPref.getString("rec_grammar_name", getString(R.string.grammar_name_default_value)) + " " +
 //                            Boolean.toString(sharedPref.getBoolean("rec_save_logs", false)));
-        int threshold = sharedPref.getInt("rec_sensitivity_of_the_activation_phrase", getResources().getInteger(R.integer.sensitivity_of_the_activation_phrase_default_value));
+        int kws_threshold = sharedPref.getInt("rec_kws_threshold", getResources().getInteger(R.integer.kws_threshold_default_value));
+        float vad_threshold = sharedPref.getInt("rec_vad_threshold", getResources().getInteger(R.integer.vad_threshold_default_value)) / 100.0f;
         String grammar_name = sharedPref.getString("rec_grammar_name", getString(R.string.grammar_name_default_value));
         SpeechRecognizerSetup setup = SpeechRecognizerSetup.defaultSetup()
                 .setAcousticModel(new File(assetsDir, "ru-ru-ptm"))
                 .setDictionary(new File(assetsDir, "car.dict"))
                 .setBoolean("-remove_noise", true)
                 .setSampleRate(8000)
-                .setKeywordThreshold((float) Math.pow(10, -threshold));
+                .setKeywordThreshold((float) Math.pow(10, -kws_threshold))
+                .setFloat("-vad_threshold", vad_threshold);
 
         if (sharedPref.getBoolean("rec_save_logs", false)) {
             setup.setRawLogDir(assetsDir); // To disable logging of raw audio comment out this call (takes a lot of space on the device)

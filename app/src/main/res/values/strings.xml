@@ -6,8 +6,11 @@
     <string name="settings">Настройки</string>
     <string name="recognition_category">Распознавание</string>
     <string name="debug_category">Для разработчиков</string>
-    <string name="sensitivity_of_the_activation_phrase">Чувствительность</string>
-    <string name="sensitivity_of_the_activation_phrase_summary">Чувствительность распознавания активационной фразы</string>
+    <string name="kws_threshold">Активация</string>
+    <string name="kws_threshold_summary">Чувствительность распознавания активационной фразы</string>
+    <string name="vad_threshold">Фоновый шум</string>
+    <string name="vad_threshold_summary">Порог наличия речи на фоне шума</string>
+
     <string name="grammar_name">Грамматика</string>
     <string name="grammar_name_summary">Выбор грамматики, используемой для распознавания. "Long" означает возможность распознавания нескольких фраз подряд</string>
     <string name="save_logs">Сохранять логи</string>

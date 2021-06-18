@@ -11,9 +11,12 @@
     <string name="grammar_name_default_value">
         car_long.gram
     </string>
-    <integer name="sensitivity_of_the_activation_phrase_default_value">6</integer>
-    <integer name="sensitivity_of_the_activation_phrase_max_value">10</integer>
-    <integer name="sensitivity_of_the_activation_phrase_min_value">3</integer>
+    <integer name="kws_threshold_default_value">6</integer>
+    <integer name="kws_threshold_max_value">10</integer>
+    <integer name="kws_threshold_min_value">3</integer>
+    <integer name="vad_threshold_default_value">330</integer>
+    <integer name="vad_threshold_max_value">500</integer>
+    <integer name="vad_threshold_min_value">200</integer>
     <integer name="rec_timeout">10000</integer>
     <string name="rec_keyphrase">активировать</string>
 </resources>
