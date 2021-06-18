@@ -12,7 +12,6 @@
                 android:max="@integer/kws_threshold_max_value"
                 android:defaultValue="@integer/kws_threshold_default_value"
                 asp:min="@integer/kws_threshold_min_value"
-                android:progress="1"
                 app:showSeekBarValue="true" />
         <SeekBarPreference
                 android:key="rec_vad_threshold"
@@ -21,7 +20,6 @@
                 android:max="@integer/vad_threshold_max_value"
                 android:defaultValue="@integer/vad_threshold_default_value"
                 asp:min="@integer/vad_threshold_min_value"
-                android:progress="5"
                 app:showSeekBarValue="true" />
         <ListPreference
                 android:key="rec_grammar_name"

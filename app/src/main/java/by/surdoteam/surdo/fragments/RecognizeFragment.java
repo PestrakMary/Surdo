@@ -87,13 +87,13 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             ActivityResultLauncher<String> mPermissionResult = registerForActivityResult(
                     new ActivityResultContracts.RequestPermission(),
                     result -> {
-                        if(result) {
+                        if (result) {
                             // Recognizer initialization is a time-consuming and it involves IO,
                             // so we execute it in async task
                             permissionCheck = PackageManager.PERMISSION_GRANTED;
                             recognizeStart.setEnabled(false);
                             recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
-                                new SetupTask(this).execute();
+                            startSetup();
                         }
                     });
             recognizeStart.setOnClickListener(view1 -> mPermissionResult.launch(Manifest.permission.RECORD_AUDIO));
