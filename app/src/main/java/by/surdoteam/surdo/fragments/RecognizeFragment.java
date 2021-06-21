@@ -1,7 +1,6 @@
 package by.surdoteam.surdo.fragments;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -16,10 +15,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -79,7 +76,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         View view = inflater.inflate(R.layout.fragment_recognize, container, false);
         videoViewFragmentRecognize = new MultipleVideoView(view.findViewById(R.id.videoViewFragmentRecognize));
 
-        recognizeStart = view.findViewById(R.id.recognizeStartbutton);
+        recognizeStart = view.findViewById(R.id.recognizeStartButton);
         recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewCommand = view.findViewById(R.id.textViewCommand);
 
@@ -231,12 +228,12 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             if (searchName.equals(KWS_SEARCH)) {
                 recognizer.startListening(searchName);
                 recognizeStart.setImageResource(R.drawable.microphone);
-//                Toast.makeText(requireActivity().getApplicationContext(), "Скажите \"активировать\"", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireActivity().getApplicationContext(), "Скажите \"активировать\"", Toast.LENGTH_SHORT).show();
                 Log.d("switchSearch", "Activated");
             } else {
                 recognizer.startListening(searchName, getResources().getInteger(R.integer.rec_timeout));
                 recognizeStart.setImageResource(R.drawable.microphone_on);
-//                Toast.makeText(requireActivity().getApplicationContext(), "Слушаю", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireActivity().getApplicationContext(), "Слушаю", Toast.LENGTH_SHORT).show();
                 Log.d("switchSearch", "Start listening");
             }
         }
@@ -339,7 +336,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 Log.d("onPostExecute", Arrays.toString(Objects.requireNonNull(result.getStackTrace())));
             } else {
                 activityReference.get().switchSearch(KWS_SEARCH);
-                activityReference.get().requireView().findViewById(R.id.recognizeStartbutton).setEnabled(true);
+                activityReference.get().requireView().findViewById(R.id.recognizeStartButton).setEnabled(true);
             }
         }
     }

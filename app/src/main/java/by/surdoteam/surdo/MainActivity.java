@@ -42,14 +42,14 @@ public class MainActivity extends AppCompatActivity {
         try {
             InputStream inputStream = getResources().openRawResource(R.raw.lib);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String eachline = bufferedReader.readLine();
-            while (eachline != null) {
+            String eachLine = bufferedReader.readLine();
+            while (eachLine != null) {
                 // `the words in the file are separated by space`, so to get each words
-                String[] words = eachline.split(", ");
+                String[] words = eachLine.split(", ");
                 System.out.println(words[0] + "   " + words[1]);
                 library.put(words[0], this.getResources().getIdentifier(words[1],
                         "raw", this.getPackageName()));
-                eachline = bufferedReader.readLine();
+                eachLine = bufferedReader.readLine();
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -134,32 +134,31 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id) {
-            case R.id.recognizer_settings:
-                getSupportFragmentManager().
-                        beginTransaction().
-                        replace(R.id.fragmentContainer,
-                                getRecognizeFragment())
-                        .addToBackStack(null)
-                        .commit();
-                return true;
-            case R.id.library_settings:
-                getSupportFragmentManager().
-                        beginTransaction().
-                        replace(R.id.fragmentContainer,
-                                getLibFragment())
-                        .addToBackStack(null)
-                        .commit();
-                return true;
-            case R.id.action_settings:
-                getSupportFragmentManager().
-                        beginTransaction().
-                        replace(R.id.fragmentContainer,
-                                getSettingsFragment())
-                        .addToBackStack(null)
-                        .commit();
-                return true;
-            case R.id.about_settings:
+        if (id == R.id.recognizer_settings) {
+            getSupportFragmentManager().
+                    beginTransaction().
+                    replace(R.id.fragmentContainer,
+                            getRecognizeFragment())
+                    .addToBackStack(null)
+                    .commit();
+            return true;
+        } else if (id ==R.id.library_settings) {
+            getSupportFragmentManager().
+                    beginTransaction().
+                    replace(R.id.fragmentContainer,
+                            getLibFragment())
+                    .addToBackStack(null)
+                    .commit();
+            return true;
+        } else if (id == R.id.action_settings) {
+            getSupportFragmentManager().
+                    beginTransaction().
+                    replace(R.id.fragmentContainer,
+                            getSettingsFragment())
+                    .addToBackStack(null)
+                    .commit();
+            return true;
+        } else if (id == R.id.about_settings) {
                 getSupportFragmentManager().
                         beginTransaction().
                         replace(R.id.fragmentContainer,
