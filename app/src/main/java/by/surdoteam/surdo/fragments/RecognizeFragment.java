@@ -215,6 +215,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 recognizer.shutdown();
                 startSetup();
             } else {
+                recognizeStart.setEnabled(true);
                 switchSearch(KWS_SEARCH);
             }
         }
