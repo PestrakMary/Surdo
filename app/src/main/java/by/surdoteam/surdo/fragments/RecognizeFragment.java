@@ -171,7 +171,8 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         // Create keyword-activation search.
         keyphrase = getString(R.string.rec_keyphrase);
         recognizer.addKeyphraseSearch(KWS_SEARCH, keyphrase);
-        File menuGrammar = new File(assetsDir, grammar_name);
+//        File menuGrammar = new File(assetsDir, grammar_name);
+        File menuGrammar = new File(assetsDir, "ru.lm");
         Log.d("File", menuGrammar.getAbsolutePath());
         StringBuilder sb = new StringBuilder("((?<=^| )(?:(?:");
         for (int i = 0; i < arguments.size(); i++) {
@@ -182,7 +183,8 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         }
         sb.append("))(?=$| ))+");
         splitter = Pattern.compile(sb.toString());
-        recognizer.addGrammarSearch(PHRASE_SEARCH, menuGrammar);
+//        recognizer.addGrammarSearch(PHRASE_SEARCH, menuGrammar);
+        recognizer.addNgramSearch(PHRASE_SEARCH, menuGrammar);
     }
 
     @Override
