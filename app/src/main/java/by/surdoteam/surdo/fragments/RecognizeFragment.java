@@ -172,7 +172,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         keyphrase = getString(R.string.rec_keyphrase);
         recognizer.addKeyphraseSearch(KWS_SEARCH, keyphrase);
 //        File menuGrammar = new File(assetsDir, grammar_name);
-        File menuGrammar = new File(assetsDir, "ru.lm");
+        File menuGrammar = new File(assetsDir, "car.lm");
         Log.d("File", menuGrammar.getAbsolutePath());
         StringBuilder sb = new StringBuilder("((?<=^| )(?:(?:");
         for (int i = 0; i < arguments.size(); i++) {
