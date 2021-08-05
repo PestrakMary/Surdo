@@ -1,18 +1,19 @@
-поворот направо, turn_right
-поворот налево, turn_left
-тормоз, brake
-газ, gas
 автомобиль, car
+быстрее, faster
 включите левый поворотник, turn_on_the_left_turn_signal
 включите правый поворотник, turn_on_the_right_turn_signal
-быстрее, faster
-нажмите газ, press_the_gas
+включите фары, turn_on_the_headlights
+выжмите сцепление, squeeze_the_clutch
+выключите левый поворотник, turn_off_the_left_turn_signal
+выключите правый поворотник, turn_off_the_right_turn_signal
+выключите фары, turn_off_the_headlights
+газ, gas
 до перекрёстка, to_the_crossroads
 дорога, road
 едем прямо, going_straight
 задний ход, reverse
-выключите левый поворотник, turn_off_the_left_turn_signal
 можно, can
+нажмите газ, press_the_gas
 начинаем движение, start_moving
 нельзя, must_not
 необозначенный перекрёсток, unmarked_intersection
@@ -23,10 +24,12 @@
 обозначенный перекрёсток, designated_intersection
 перестроение, lane_change
 пешеходный переход, crosswalk
+поворот налево, turn_left
+поворот направо, turn_right
 поднимите сцепление, lift_the_clutch
 помедленнее, slower
 после перекрёстка, after_the_crossroads
-выключите правый поворотник, turn_off_the_right_turn_signal
+посмотрите внимательно, look_carefully
 притормозите, slow_down
 разворот, reversal
 разрешено, allowed
@@ -34,9 +37,6 @@
 светофор, traffic_light
 сдали, passed
 смотрите на дорогу, look_at_the_road
-выжмите сцепление, squeeze_the_clutch
 съезд с дороги, exit_from_the_road
-выключите фары, turn_off_the_headlights
+тормоз, brake
 чуть-чуть быстрее, a_little_bit_faster
-посмотрите внимательно, look_carefully
-включите фары, turn_on_the_headlights
