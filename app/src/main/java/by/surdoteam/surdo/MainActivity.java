@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
             while (eachLine != null) {
                 // `the words in the file are separated by space`, so to get each words
                 String[] words = eachLine.split(", ");
-                System.out.println(words[0] + "   " + words[1]);
                 library.put(words[0], this.getResources().getIdentifier(words[1],
                         "raw", this.getPackageName()));
                 eachLine = bufferedReader.readLine();

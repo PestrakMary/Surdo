@@ -65,8 +65,8 @@ abstract class BuildGramTask extends DefaultTask {
     void execute() {
         println 'buildGram is in building'
         def libCommands = lib.get().asFile.collect() { line ->
-            line.split(", ", 2)[0]
-        }
+            line.split(", ", 2)[0].split("\\|")
+        }.flatten()
         def dictWords = dict.get().asFile.collect() { line ->
             line.split(" ", 2)[0]
         }
@@ -95,6 +95,7 @@ public <command> = ( <item> );
 """,'utf-8')
     }
 }
+
 
 task buildGram(type: BuildGramTask) {
     def assetsDir = android.sourceSets.main.assets.srcDirs[0].toString()
