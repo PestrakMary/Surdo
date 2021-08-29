@@ -6,13 +6,20 @@
             app:key="recognition_category"
             app:title="@string/recognition_category">
         <SeekBarPreference
-                android:key="rec_sensitivity_of_the_activation_phrase"
-                android:summary="@string/sensitivity_of_the_activation_phrase_summary"
-                android:title="@string/sensitivity_of_the_activation_phrase"
-                android:max="10"
-                android:defaultValue="6"
-                asp:min="3"
-                android:progress="1"
+                android:key="rec_kws_threshold"
+                android:summary="@string/kws_threshold_summary"
+                android:title="@string/kws_threshold"
+                android:max="@integer/kws_threshold_max_value"
+                android:defaultValue="@integer/kws_threshold_default_value"
+                asp:min="@integer/kws_threshold_min_value"
+                app:showSeekBarValue="true" />
+        <SeekBarPreference
+                android:key="rec_vad_threshold"
+                android:summary="@string/vad_threshold_summary"
+                android:title="@string/vad_threshold"
+                android:max="@integer/vad_threshold_max_value"
+                android:defaultValue="@integer/vad_threshold_default_value"
+                asp:min="@integer/vad_threshold_min_value"
                 app:showSeekBarValue="true" />
         <ListPreference
                 android:key="rec_grammar_name"

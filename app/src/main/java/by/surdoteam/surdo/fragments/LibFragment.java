@@ -1,13 +1,10 @@
 package by.surdoteam.surdo.fragments;
 
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -16,14 +13,14 @@ import android.widget.VideoView;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import by.surdoteam.surdo.MainActivity;
 import by.surdoteam.surdo.R;
 import by.surdoteam.surdo.db.AppDatabase;
 import by.surdoteam.surdo.db.Command;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class LibFragment extends Fragment {
 
@@ -46,7 +43,7 @@ public class LibFragment extends Fragment {
         listViewFragmentLib.setOnItemClickListener((parent, itemClicked, position, id) -> {
             TextView textView = (TextView) itemClicked;
             String strText = textView.getText().toString(); // получаем текст нажатого элемента
-            videoViewFragmentLib.setVideoURI(Uri.parse("android.resource://" + Objects.requireNonNull(getActivity()).getPackageName() + "/" + video.get(arguments.indexOf(strText))));
+            videoViewFragmentLib.setVideoURI(Uri.parse("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(strText))));
             videoViewFragmentLib.requestFocus(0);
             videoViewFragmentLib.start();
         });
@@ -56,7 +53,7 @@ public class LibFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        database = ((MainActivity) Objects.requireNonNull(getActivity())).getDatabase();
+        database = ((MainActivity) requireActivity()).getDatabase();
 
         arguments = database.CommandDao().
                 getAll().
