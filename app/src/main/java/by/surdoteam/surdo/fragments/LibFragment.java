@@ -58,7 +58,7 @@ public class LibFragment extends Fragment {
         arguments = database.CommandDao().
                 getAll().
                 stream().
-                map(Command::getWord).
+                map((command -> command.getWord().split("\\|")[0])).
                 collect(Collectors.toList());
         video = database.CommandDao().
                 getAll().

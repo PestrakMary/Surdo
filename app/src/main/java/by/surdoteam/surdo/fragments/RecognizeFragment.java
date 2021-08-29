@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -119,16 +120,14 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         permissionCheck = ContextCompat.checkSelfPermission(requireActivity().getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         AppDatabase database = ((MainActivity) requireActivity()).getDatabase();
 
-        arguments = database.CommandDao().
-                getAll().
-                stream().
-                map(Command::getWord).
-                collect(Collectors.toList());
-        video = database.CommandDao().
-                getAll().
-                stream().
-                map(Command::getPath).
-                collect(Collectors.toList());
+        arguments = new LinkedList<>();
+        video = new LinkedList<>();
+        for(Command command :database.CommandDao().getAll()) {
+            for (String word : command.getWord().split("\\|")) {
+                arguments.add(word);
+                video.add(command.getPath());
+            }
+        }
         startSetup();
     }
 

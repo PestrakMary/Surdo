@@ -1,41 +1,42 @@
-поворот направо, turn_right
-поворот налево, turn_left
-тормоз, brake
-газ, gas
 автомобиль, car
-включи левый поворотник, turn_on_the_left_turn_signal
-включи правый поворотник, turn_on_the_right_turn_signal
 быстрее, faster
-быстро, fast
-нажми газ, press_the_gas
+включите левый поворотник|включи левый поворотник|левый поворотник включите|левый поворотник включи, turn_on_the_left_turn_signal
+включите правый поворотник|включи правый поворотник|правый поворотник включите|правый поворотник включи, turn_on_the_right_turn_signal
+включите фары|включи фары|фары включите|фары включи, turn_on_the_headlights
+выжмите сцепление|выжми сцепление|сцепление выжмите|сцепление выжми, squeeze_the_clutch
+выключите левый поворотник|выключи левый поворотник|левый поворотник выключите|левый поворотник выключи, turn_off_the_left_turn_signal
+выключите правый поворотник|выключи правый поворотник|правый поворотник выключите|правый поворотник выключи, turn_off_the_right_turn_signal
+выключите фары|выключи фары|фары выключите|фары выключи, turn_off_the_headlights
+газ, gas
 до перекрёстка, to_the_crossroads
 дорога, road
-едем прямо, going_straight
+едем прямо|прямо едем, going_straight
 задний ход, reverse
-выключи левый поворотник, turn_off_the_left_turn_signal
 можно, can
-начинаем движение, start_moving
+нажмите газ|нажми газ|газ нажмите|газ нажми, press_the_gas
+начинаем движение|движение начинаем, start_moving
 нельзя, must_not
 необозначенный перекрёсток, unmarked_intersection
 нерегулируемый перекрёсток, unregulated_intersection
-не сдал, did_not_pass
-не торопись, do_not_rush
+не сдали|не сдал|не сдала, did_not_pass
+не торопитесь|не торопись, do_not_rush
 нужно, need
 обозначенный перекрёсток, designated_intersection
 перестроение, lane_change
 пешеходный переход, crosswalk
-подними сцепление, lift_the_clutch
-помедленнее, slow_down
+поворот налево, turn_left
+поворот направо, turn_right
+поднимите сцепление|подними сцепление|сцепление поднимите|сцепление поднимите, lift_the_clutch
+помедленнее, slower
 после перекрёстка, after_the_crossroads
-выключи правый поворотник, turn_off_the_right_turn_signal
-притормози, slow_down_1
+посмотрите внимательно|посмотри внимательно|внимательно посмотрите|внимательно посмотри, look_carefully
+притормозите|притормози, slow_down
 разворот, reversal
 разрешено, allowed
 регулируемый перекрёсток, regulated_intersection
 светофор, traffic_light
-сдал, passed
-смотри на дорогу, look_at_the_road
-выжми сцепление, squeeze_the_clutch
+сдали|сдал|сдала, passed
+смотрите на дорогу|смотри на дорогу|на дорогу смотрите|на дорогу смотрите, look_at_the_road
 съезд с дороги, exit_from_the_road
-выключи фары, turn_off_the_headlights
-чуть-чуть быстрее, a_little_bit_faster
+тормоз, brake
+чуть-чуть быстрее|быстрее чуть-чуть, a_little_bit_faster
