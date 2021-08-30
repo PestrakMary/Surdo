@@ -104,8 +104,5 @@ task buildGram(type: BuildGramTask) {
     gram = file(Paths.get(assetsDir, 'sync', 'car.gram').toString())
 }
 
-ant.importBuild 'assets.xml'
 list.dependsOn(buildGram)
 checksum.dependsOn(buildGram)
-preBuild.dependsOn(list, checksum)
-clean.dependsOn(clean_assets)
