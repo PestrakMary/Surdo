@@ -104,5 +104,3 @@ task buildGram(type: BuildGramTask) {
     gram = file(Paths.get(assetsDir, 'sync', 'car.gram').toString())
 }
 
-list.dependsOn(buildGram)
-checksum.dependsOn(buildGram)
