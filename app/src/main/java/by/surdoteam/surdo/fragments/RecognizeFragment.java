@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -23,39 +22,39 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.vosk.Model;
+import org.vosk.Recognizer;
+import org.vosk.android.RecognitionListener;
+import org.vosk.android.SpeechService;
+import org.vosk.android.SpeechStreamService;
+import org.vosk.android.StorageService;
+
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import by.surdoteam.surdo.MainActivity;
 import by.surdoteam.surdo.MultipleVideoView;
 import by.surdoteam.surdo.R;
 import by.surdoteam.surdo.db.AppDatabase;
 import by.surdoteam.surdo.db.Command;
-import edu.cmu.pocketsphinx.Assets;
-import edu.cmu.pocketsphinx.Hypothesis;
-import edu.cmu.pocketsphinx.RecognitionListener;
-import edu.cmu.pocketsphinx.SpeechRecognizer;
-import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
+
 
 public class RecognizeFragment extends Fragment implements RecognitionListener {
+    static private final int STATE_START = 0;
+    static private final int STATE_READY = 1;
+    static private final int STATE_DONE = 2;
+    static private final int STATE_LISTENING = 3;
+    static private final int STATE_NO_PERMISSION = 4;
+    static private final int STATE_CRASH = 5;
 
-    private static final String KWS_SEARCH = "wakeup";
-    /* Keyword we are looking for to activate menu */
-    private String keyphrase;
-    /* Named searches allow to quickly reconfigure the decoder */
-    private static final String PHRASE_SEARCH = "phrase";
-    private SpeechRecognizer recognizer;
     private Pattern splitter;
     private int permissionCheck;
-    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
     private List<String> arguments;
     private List<Integer> video;
     private TextView textViewCommand;
@@ -68,39 +67,10 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     private MultipleVideoView videoViewFragmentRecognize;
 
+    private Model model;
+    private SpeechService speechService;
+
     public RecognizeFragment() {
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_recognize, container, false);
-        videoViewFragmentRecognize = new MultipleVideoView(view.findViewById(R.id.videoViewFragmentRecognize));
-
-        recognizeStart = view.findViewById(R.id.recognizeStartButton);
-        recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        textViewCommand = view.findViewById(R.id.textViewCommand);
-
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityResultLauncher<String> mPermissionResult = registerForActivityResult(
-                    new ActivityResultContracts.RequestPermission(),
-                    result -> {
-                        if (result) {
-                            // Recognizer initialization is a time-consuming and it involves IO,
-                            // so we execute it in async task
-                            permissionCheck = PackageManager.PERMISSION_GRANTED;
-                            recognizeStart.setEnabled(false);
-                            recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
-                            startSetup();
-                        }
-                    });
-            recognizeStart.setOnClickListener(view1 -> mPermissionResult.launch(Manifest.permission.RECORD_AUDIO));
-            recognizeStart.setEnabled(true);
-            recognizeStart.setImageResource(R.drawable.microphone_off);
-        } else {
-            recognizeStart.setOnClickListener(view1 -> switchSearch(PHRASE_SEARCH));
-        }
-        return view;
     }
 
     @Override
@@ -122,7 +92,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
         arguments = new LinkedList<>();
         video = new LinkedList<>();
-        for(Command command :database.CommandDao().getAll()) {
+        for (Command command : database.CommandDao().getAll()) {
             for (String word : command.getWord().split("\\|")) {
                 arguments.add(word);
                 video.add(command.getPath());
@@ -131,212 +101,169 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         startSetup();
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_recognize, container, false);
+        videoViewFragmentRecognize = new MultipleVideoView(view.findViewById(R.id.videoViewFragmentRecognize));
+
+        recognizeStart = view.findViewById(R.id.recognizeStartButton);
+        recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        textViewCommand = view.findViewById(R.id.textViewCommand);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            switchSearch(STATE_NO_PERMISSION);
+        } else {
+            recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_LISTENING));
+        }
+        return view;
+    }
+
     private void startSetup() {
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        // Recognizer initialization is a time-consuming and it involves IO,
-        // so we execute it in async task
-        new SetupTask(this).execute();
+        switchSearch(STATE_START);
+        StorageService.unpack(this.getContext(), "vosk-model-small-ru-0.15", "model",
+                (model) -> {
+                    setupRecognizer(model);
+                    switchSearch(STATE_READY);
+                },
+                (exception) -> setErrorState("Failed to unpack the model: " + exception.getLocalizedMessage()));
     }
 
-    private void setupRecognizer(File assetsDir) throws IOException {
-        // The recognizer can be configured to perform multiple searches
-        // of different kind and switch between them
-//        Log.e("Settings", Integer.toString(sharedPref.getInt("rec_kws_threshold", 6)) + " " +
-//                             sharedPref.getString("rec_grammar_name", getString(R.string.grammar_name_default_value)) + " " +
-//                            Boolean.toString(sharedPref.getBoolean("rec_save_logs", false)));
-        int kws_threshold = sharedPref.getInt("rec_kws_threshold", getResources().getInteger(R.integer.kws_threshold_default_value));
-        float vad_threshold = sharedPref.getInt("rec_vad_threshold", getResources().getInteger(R.integer.vad_threshold_default_value)) / 100.0f;
-        String grammar_name = sharedPref.getString("rec_grammar_name", getString(R.string.grammar_name_default_value));
-        SpeechRecognizerSetup setup = SpeechRecognizerSetup.defaultSetup()
-                .setAcousticModel(new File(assetsDir, "ru-ru-ptm"))
-                .setDictionary(new File(assetsDir, "car.dict"))
-                .setBoolean("-remove_noise", true)
-                .setSampleRate(8000)
-                .setKeywordThreshold((float) Math.pow(10, -kws_threshold))
-                .setFloat("-vad_threshold", vad_threshold);
-
-        if (sharedPref.getBoolean("rec_save_logs", false)) {
-            setup.setRawLogDir(assetsDir); // To disable logging of raw audio comment out this call (takes a lot of space on the device)
-        }
-        recognizer = setup.getRecognizer();
-        recognizer.addListener(this);
-
-        /* In your application you might not need to add all those searches.
-          They are added here for demonstration. You can leave just one.
-         */
-
-        // Create keyword-activation search.
-        keyphrase = getString(R.string.rec_keyphrase);
-        recognizer.addKeyphraseSearch(KWS_SEARCH, keyphrase);
-        File menuGrammar = new File(assetsDir, grammar_name);
-        Log.d("File", menuGrammar.getAbsolutePath());
-        StringBuilder sb = new StringBuilder("((?<=^| )(?:(?:");
+    private void setupRecognizer(Model m) {
+        StringBuilder parserPattern = new StringBuilder("((?<=^| )(?:(?:");
+        StringBuilder grammarJSON = new StringBuilder("[");
         for (int i = 0; i < arguments.size(); i++) {
-            sb.append(arguments.get(i));
+            parserPattern.append(arguments.get(i));
+            grammarJSON.append("\"").append(arguments.get(i)).append("\", ");
             if (i < arguments.size() - 1) {
-                sb.append(")|(?:");
+                parserPattern.append(")|(?:");
             }
         }
-        sb.append("))(?=$| ))+");
-        splitter = Pattern.compile(sb.toString());
-        recognizer.addGrammarSearch(PHRASE_SEARCH, menuGrammar);
+        parserPattern.append("))(?=$| ))+");
+        grammarJSON.append("\"[unk]\"]");
+        splitter = Pattern.compile(parserPattern.toString());
+        model = m;
+
+        try {
+            Recognizer rec = new Recognizer(model, 16000.0f, grammarJSON.toString());
+            speechService = new SpeechService(rec, 16000.0f);
+        } catch (IOException e) {
+            setErrorState(e.getMessage());
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        if (recognizer != null) {
-            recognizer.cancel();
-            recognizer.shutdown();
-        }
+//        if (recognizer != null) {
+//            recognizer.cancel();
+//            recognizer.shutdown();
+//        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
         videoViewFragmentRecognize.reset();
-        if (recognizer != null) {
-            recognizer.cancel();
-        }
+//        if (recognizer != null) {
+//            recognizer.cancel();
+//        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if (recognizer != null) {
-            if (settingsChanged) {
-                recognizeStart.setEnabled(false);
-                settingsChanged = false;
-                recognizer.cancel();
-                recognizer.shutdown();
-                startSetup();
-            } else {
-                recognizeStart.setEnabled(true);
-                switchSearch(KWS_SEARCH);
-            }
-        }
+//        if (recognizer != null) {
+//            if (settingsChanged) {
+//                recognizeStart.setEnabled(false);
+//                settingsChanged = false;
+//                recognizer.cancel();
+//                recognizer.shutdown();
+//                startSetup();
+//            } else {
+//                recognizeStart.setEnabled(true);
+//                switchSearch(KWS_SEARCH);
+//            }
+//        }
     }
 
-    private void switchSearch(String searchName) {
-        Log.d("switchSearch", "Try to switch");
-        if (recognizer != null) {
-            recognizer.stop();
-            // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
-            if (searchName.equals(KWS_SEARCH)) {
-                recognizer.startListening(searchName);
-                recognizeStart.setImageResource(R.drawable.microphone);
-                Toast.makeText(requireActivity().getApplicationContext(), "Скажите \"активировать\"", Toast.LENGTH_SHORT).show();
-                Log.d("switchSearch", "Activated");
-            } else {
-                recognizer.startListening(searchName, getResources().getInteger(R.integer.rec_timeout));
+    // UI
+    private void switchSearch(int state) {
+        switch (state) {
+            case STATE_LISTENING:
                 recognizeStart.setImageResource(R.drawable.microphone_on);
-                Toast.makeText(requireActivity().getApplicationContext(), "Слушаю", Toast.LENGTH_SHORT).show();
-                Log.d("switchSearch", "Start listening");
-            }
+                speechService.startListening(this);
+                break;
+            case STATE_READY:
+                recognizeStart.setImageResource(R.drawable.microphone);
+                recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_LISTENING));
+                break;
+            case STATE_NO_PERMISSION:
+                ActivityResultLauncher<String> mPermissionResult = registerForActivityResult(
+                        new ActivityResultContracts.RequestPermission(),
+                        result -> {
+                            if (result) {
+                                permissionCheck = PackageManager.PERMISSION_GRANTED;
+                                startSetup();
+                            }
+                        });
+                recognizeStart.setOnClickListener(view1 -> mPermissionResult.launch(Manifest.permission.RECORD_AUDIO));
+                recognizeStart.setEnabled(true);
+                recognizeStart.setImageResource(R.drawable.microphone_off);
+                break;
+            case STATE_CRASH:
+                recognizeStart.setEnabled(false);
+                recognizeStart.setImageResource(R.drawable.microphone_off);
+                // todo: safely cancel everything
+                break;
         }
     }
 
     @Override
     public void onError(Exception error) {
         //вывести, что все плохо в TextView
-        Toast.makeText(requireActivity().getApplicationContext(), Objects.requireNonNull(error.getLocalizedMessage()), Toast.LENGTH_LONG).show();
-        Log.e("onError", Objects.requireNonNull(error.getMessage()));
-        Log.d("onError", Arrays.toString(Objects.requireNonNull(error.getStackTrace())));
+        setErrorState(error.getLocalizedMessage());
+    }
+
+    private void setErrorState(String message) {
+        Toast.makeText(requireActivity().getApplicationContext(), Objects.requireNonNull(message), Toast.LENGTH_LONG).show();
+        switchSearch(STATE_CRASH);
     }
 
     @Override
     public void onTimeout() {
-        switchSearch(KWS_SEARCH);
-        Log.d("onTimeout", "Stop listening");
+        switchSearch(STATE_DONE);
         // hide RecognizeFragment here
     }
 
     @Override
-    public void onBeginningOfSpeech() {
-        Log.d("onBeginningOfSpeech", "Start recognition");
+    public void onFinalResult(String hypothesis) {
+        onResult(hypothesis);
+        switchSearch(STATE_DONE);
     }
 
-    /**
-     * We stop recognizer here to get a final result
-     */
     @Override
-    public void onEndOfSpeech() {
-        Log.d("onEndOfSpeech", "End search");
-        if (recognizer.getSearchName().equals(PHRASE_SEARCH)) {
-            switchSearch(KWS_SEARCH);
-            // hide RecognizeFragment here
-        }
-    }
-
-    /**
-     * In partial result we get quick updates about current hypothesis. In
-     * keyword spotting mode we can react here, in other modes we need to wait
-     * for final result in onResult.
-     */
-    @Override
-    public void onPartialResult(Hypothesis hypothesis) {
-        if (hypothesis == null)
-            return;
-        String text = hypothesis.getHypstr();
-        if (text.equals(keyphrase)) {
-            switchSearch(PHRASE_SEARCH);
-            // show RecognizeFragment here
-
-        }
-        Log.d("onPartialResult", text);
+    public void onPartialResult(String s) {
+// Just do nothing now
     }
 
     /**
      * This callback is called when we stop the recognizer.
      */
     @Override
-    public void onResult(Hypothesis hypothesis) {
+    public void onResult(String hypothesis) {
         if (hypothesis != null) {
-            String strText = hypothesis.getHypstr();
-            textViewCommand.setText(strText.toCharArray(), 0, strText.length());
-            Log.d("onResult", strText);
-            Matcher matcher = splitter.matcher(strText);
+            textViewCommand.setText(hypothesis);
+            Matcher matcher = splitter.matcher(hypothesis);
             while (matcher.find()) {
-                String s = strText.substring(matcher.start(), matcher.end());
+                String s = hypothesis.substring(matcher.start(), matcher.end());
                 if (arguments.contains(s)) { // necessary until not all phrases in car.gram implemented
                     videoViewFragmentRecognize.addVideo(Uri.parse("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(s))));
                 }
-            }
-        }
-    }
-
-    private static class SetupTask extends AsyncTask<Void, Void, Exception> {
-        WeakReference<RecognizeFragment> activityReference;
-
-        SetupTask(RecognizeFragment activity) {
-            this.activityReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        protected Exception doInBackground(Void... params) {
-            try {
-                Assets assets = new Assets(activityReference.get().requireActivity());
-                File assetDir = assets.syncAssets();
-                activityReference.get().setupRecognizer(assetDir);
-            } catch (IOException e) {
-                return e;
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Exception result) {
-            if (result != null) {
-                Toast.makeText(activityReference.get().requireActivity().getApplicationContext(), Objects.requireNonNull(result.getLocalizedMessage()), Toast.LENGTH_LONG).show();
-                Log.e("onPostExecute", "Failed to init recognizer");
-                Log.e("onPostExecute", Objects.requireNonNull(result.getMessage()));
-                Log.d("onPostExecute", Arrays.toString(Objects.requireNonNull(result.getStackTrace())));
-            } else {
-                activityReference.get().switchSearch(KWS_SEARCH);
-                activityReference.get().requireView().findViewById(R.id.recognizeStartButton).setEnabled(true);
             }
         }
     }

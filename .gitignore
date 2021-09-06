@@ -10,3 +10,5 @@ app/src/main/assets/sync/car_long.gram
 .externalNativeBuild
 .cxx
 /pocketsphinx-android-5prealpha-release/build
+/models/src/main/assets
+/models/build/

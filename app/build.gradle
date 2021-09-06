@@ -1,8 +1,11 @@
-import org.gradle.work.Incremental
-
-import java.nio.file.Paths
-
 apply plugin: 'com.android.application'
+
+repositories {
+    google()
+    maven {
+        url 'https://alphacephei.com/maven/'
+    }
+}
 
 android {
     compileSdkVersion 30
@@ -13,6 +16,9 @@ android {
         targetSdkVersion 30
         versionCode 3
         versionName "0.4.1"
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86'
+        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -32,75 +38,18 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.3.0'
-    implementation "androidx.fragment:fragment:1.3.4"
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation "androidx.fragment:fragment:1.3.6"
     implementation "androidx.preference:preference:1.1.1"
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'com.google.android.material:material:1.4.0'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation 'android.arch.persistence.room:runtime:1.1.1'
     annotationProcessor 'android.arch.persistence.room:compiler:1.1.1'
+    implementation 'net.java.dev.jna:jna:5.8.0@aar'
+    implementation group: 'com.alphacephei', name: 'vosk-android', version: '0.3.23'
+    implementation project(':models')
 }
-
-abstract class BuildGramTask extends DefaultTask {
-    @Incremental
-    @InputFile
-    abstract RegularFileProperty getLib();
-
-    @Incremental
-    @InputFile
-    abstract RegularFileProperty getDict();
-
-    @OutputFile
-    abstract RegularFileProperty getGramLong();
-
-    @OutputFile
-    abstract RegularFileProperty getGram();
-
-    @TaskAction
-    void execute() {
-        println 'buildGram is in building'
-        def libCommands = lib.get().asFile.collect() { line ->
-            line.split(", ", 2)[0].split("\\|")
-        }.flatten()
-        def dictWords = dict.get().asFile.collect() { line ->
-            line.split(" ", 2)[0]
-        }
-        libCommands.each { command ->
-            command.split(' ').each { word ->
-                if (!dictWords.contains(word)) {
-                    throw new Exception("car.dict does not contain word ${word}, but lib.txt does")
-                }
-            }
-        }
-        gramLong.get().asFile.write("""#JSGF V1.0;
-
-grammar car;
-
-<item> = (${libCommands.join(") | (")});
-
-public <command> = ( <item> ) + ;
-""",'utf-8')
-        gram.get().asFile.write("""#JSGF V1.0;
-
-grammar car;
-
-<item> = (${libCommands.join(") | (")});
-
-public <command> = ( <item> );
-""",'utf-8')
-    }
-}
-
-
-task buildGram(type: BuildGramTask) {
-    def assetsDir = android.sourceSets.main.assets.srcDirs[0].toString()
-    lib = file(Paths.get(android.sourceSets.main.res.srcDirs[0].toString(), 'raw', 'lib.txt'))
-    dict = file(Paths.get(assetsDir, 'sync', 'car.dict').toString())
-    gramLong = file(Paths.get(assetsDir, 'sync', 'car_long.gram').toString())
-    gram = file(Paths.get(assetsDir, 'sync', 'car.gram').toString())
-}
-

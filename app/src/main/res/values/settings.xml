@@ -18,5 +18,4 @@
     <integer name="vad_threshold_max_value">500</integer>
     <integer name="vad_threshold_min_value">200</integer>
     <integer name="rec_timeout">10000</integer>
-    <string name="rec_keyphrase">активировать</string>
 </resources>

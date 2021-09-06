@@ -1,2 +1,3 @@
+include ':models'
 include ':app'
 rootProject.name='Surdo'
