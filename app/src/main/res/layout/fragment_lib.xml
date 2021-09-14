@@ -16,7 +16,7 @@
         app:fontFamily="sans-serif"
         android:text="@string/library" />
 
-    <VideoView
+    <by.surdoteam.surdo.views.GestureView
         android:id="@+id/videoViewFragmentLib"
         android:layout_width="match_parent"
         android:layout_height="300dp"

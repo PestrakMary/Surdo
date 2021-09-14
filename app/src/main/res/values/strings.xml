@@ -10,7 +10,8 @@
     <string name="kws_threshold_summary">Чувствительность распознавания активационной фразы</string>
     <string name="vad_threshold">Фоновый шум</string>
     <string name="vad_threshold_summary">Порог наличия речи на фоне шума</string>
-
+    <string name="gestures_speed">Ускорение жестов</string>
+    <string name="gestures_speed_summary">Как ускорить или замедлить демонстрацию жестов</string>
     <string name="grammar_name">Грамматика</string>
     <string name="grammar_name_summary">Выбор грамматики, используемой для распознавания. "Long" означает возможность распознавания нескольких фраз подряд</string>
     <string name="save_logs">Сохранять логи</string>
@@ -19,6 +20,7 @@
 
     <string name="recognizer">Переводчик</string>
     <string name="prompt_command">Здесь будет отображаться ваша голосовая команда</string>
+    <string name="unable_to_recognize">Не удалось распознать</string>
 
     <string name="about">О приложении</string>
     <string name="name"><p><font size="24"><b>Surdo</b></font></p></string>

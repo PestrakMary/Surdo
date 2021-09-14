@@ -17,7 +17,7 @@
             app:fontFamily="sans-serif"
             android:text="" />
 
-    <VideoView
+    <by.surdoteam.surdo.views.MultipleVideoView
             android:id="@+id/videoViewFragmentRecognize"
             android:layout_width="match_parent"
             android:layout_height="300dp"

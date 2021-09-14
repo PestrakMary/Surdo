@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,16 +21,15 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.vosk.Model;
 import org.vosk.Recognizer;
 import org.vosk.android.RecognitionListener;
 import org.vosk.android.SpeechService;
-import org.vosk.android.SpeechStreamService;
 import org.vosk.android.StorageService;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -39,7 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import by.surdoteam.surdo.MainActivity;
-import by.surdoteam.surdo.MultipleVideoView;
+import by.surdoteam.surdo.views.MultipleVideoView;
 import by.surdoteam.surdo.R;
 import by.surdoteam.surdo.db.AppDatabase;
 import by.surdoteam.surdo.db.Command;
@@ -52,6 +50,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     static private final int STATE_LISTENING = 3;
     static private final int STATE_NO_PERMISSION = 4;
     static private final int STATE_CRASH = 5;
+    static private final String RECOGNIZE_UNK = "[unk]";
 
     private Pattern splitter;
     private int permissionCheck;
@@ -67,7 +66,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     private MultipleVideoView videoViewFragmentRecognize;
 
-    private Model model;
     private SpeechService speechService;
 
     public RecognizeFragment() {
@@ -77,6 +75,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        sharedPref.getString("rec_grammar_name", getString(R.string.grammar_name_default_value));
         settingsChanged = false;
 //        cause the preference manager does not currently store a strong reference to the listener
         listener = (sharedPreferences, key) -> {
@@ -105,7 +104,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recognize, container, false);
-        videoViewFragmentRecognize = new MultipleVideoView(view.findViewById(R.id.videoViewFragmentRecognize));
+        videoViewFragmentRecognize = view.findViewById(R.id.videoViewFragmentRecognize);
 
         recognizeStart = view.findViewById(R.id.recognizeStartButton);
         recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -143,12 +142,11 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             }
         }
         parserPattern.append("))(?=$| ))+");
-        grammarJSON.append("\"[unk]\"]");
+        grammarJSON.append("\"").append(RECOGNIZE_UNK).append("\"]");
         splitter = Pattern.compile(parserPattern.toString());
-        model = m;
 
         try {
-            Recognizer rec = new Recognizer(model, 16000.0f, grammarJSON.toString());
+            Recognizer rec = new Recognizer(m, 16000.0f, grammarJSON.toString());
             speechService = new SpeechService(rec, 16000.0f);
         } catch (IOException e) {
             setErrorState(e.getMessage());
@@ -157,21 +155,24 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     @Override
     public void onDestroy() {
+        //        TODO: Test
         super.onDestroy();
-
-//        if (recognizer != null) {
-//            recognizer.cancel();
-//            recognizer.shutdown();
-//        }
+        if (speechService != null) {
+            speechService.stop();
+            speechService.shutdown();
+            speechService = null;
+        }
     }
 
     @Override
     public void onStop() {
+//        TODO: Test
         super.onStop();
         videoViewFragmentRecognize.reset();
-//        if (recognizer != null) {
-//            recognizer.cancel();
-//        }
+        if (speechService != null) {
+            speechService.stop();
+        }
+
     }
 
     @Override
@@ -201,6 +202,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             case STATE_READY:
                 recognizeStart.setImageResource(R.drawable.microphone);
                 recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_LISTENING));
+                recognizeStart.setEnabled(true);
                 break;
             case STATE_NO_PERMISSION:
                 ActivityResultLauncher<String> mPermissionResult = registerForActivityResult(
@@ -218,14 +220,13 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
             case STATE_CRASH:
                 recognizeStart.setEnabled(false);
                 recognizeStart.setImageResource(R.drawable.microphone_off);
-                // todo: safely cancel everything
+                // Todo: safely cancel everything
                 break;
         }
     }
 
     @Override
     public void onError(Exception error) {
-        //вывести, что все плохо в TextView
         setErrorState(error.getLocalizedMessage());
     }
 
@@ -237,7 +238,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     @Override
     public void onTimeout() {
         switchSearch(STATE_DONE);
-        // hide RecognizeFragment here
     }
 
     @Override
@@ -247,24 +247,39 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     }
 
     @Override
-    public void onPartialResult(String s) {
-// Just do nothing now
+    public void onPartialResult(String hypothesis) {
+// Just nothing
     }
 
     /**
      * This callback is called when we stop the recognizer.
      */
     @Override
-    public void onResult(String hypothesis) {
-        if (hypothesis != null) {
-            textViewCommand.setText(hypothesis);
-            Matcher matcher = splitter.matcher(hypothesis);
-            while (matcher.find()) {
-                String s = hypothesis.substring(matcher.start(), matcher.end());
-                if (arguments.contains(s)) { // necessary until not all phrases in car.gram implemented
-                    videoViewFragmentRecognize.addVideo(Uri.parse("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(s))));
+    public void onResult(String res) {
+        String hypothesis = getHypothesis(res);
+        if (!hypothesis.isEmpty()) {
+            if (hypothesis.equals(RECOGNIZE_UNK)) {
+                textViewCommand.setText(R.string.unable_to_recognize);
+            } else {
+                textViewCommand.setText(hypothesis);
+                Matcher matcher = splitter.matcher(hypothesis);
+                while (matcher.find()) {
+                    String s = hypothesis.substring(matcher.start(), matcher.end());
+                    if (arguments.contains(s)) { // necessary until not all phrases in car.gram implemented
+                        videoViewFragmentRecognize.addVideo(Uri.parse("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(s))));
+                    }
                 }
             }
+        }
+    }
+
+    private String getHypothesis(String res) {
+        if (res == null)
+            return "";
+        try {
+            return new JSONObject(res).optString("text");
+        } catch (JSONException e) {
+            return "";
         }
     }
 }
