@@ -50,6 +50,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     static private final int STATE_NO_PERMISSION = 4;
     static private final int STATE_CRASH = 5;
     static private final String RECOGNIZE_UNK = "[unk]";
+    static private final int NO_TIMEOUT = -1;
 
     private Pattern splitter;
     private int permissionCheck;
@@ -66,6 +67,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private VideoView videoViewFragmentRecognize;
 
     private SpeechService speechService;
+    private int listening_timeout;
 
     public RecognizeFragment() {
     }
@@ -74,13 +76,15 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        sharedPref.getString("rec_grammar_name", getString(R.string.grammar_name_default_value));
         settingsChanged = false;
+        getListeningTimeout();
 //        cause the preference manager does not currently store a strong reference to the listener
         listener = (sharedPreferences, key) -> {
 //            Toast.makeText(requireActivity().getApplicationContext(), R.string.restart_app, Toast.LENGTH_LONG).show();
             if (key.startsWith("rec_")) {
                 settingsChanged = true;
+            } else if (key.equals("lst_listening_timeout_default_value")) {
+                getListeningTimeout();
             }
         };
         sharedPref.registerOnSharedPreferenceChangeListener(listener);
@@ -109,10 +113,11 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         recognizeStart.setScaleType(ImageView.ScaleType.FIT_CENTER);
         textViewCommand = view.findViewById(R.id.textViewCommand);
 
+//        We already started setup in onCreate, but can call switchSearch only here, when UI was created
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             switchSearch(STATE_NO_PERMISSION);
         } else {
-            recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_LISTENING));
+            switchSearch(STATE_START);
         }
         return view;
     }
@@ -121,7 +126,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        switchSearch(STATE_START);
         StorageService.unpack(this.getContext(), "vosk-model-small-ru-0.15", "model",
                 (model) -> {
                     setupRecognizer(model);
@@ -175,36 +179,39 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public void onStart() {
         super.onStart();
         if (speechService != null) {
-            switchSearch(STATE_READY);
+            if (settingsChanged) {
+                settingsChanged = false;
+                speechService.stop();
+                speechService.shutdown();
+                speechService = null;
+                switchSearch(STATE_START);
+                startSetup();
+            } else {
+                switchSearch(STATE_READY);
+            }
         }
-//        if (recognizer != null) {
-//            if (settingsChanged) {
-//                recognizeStart.setEnabled(false);
-//                settingsChanged = false;
-//                recognizer.cancel();
-//                recognizer.shutdown();
-//                startSetup();
-//            } else {
-//                recognizeStart.setEnabled(true);
-//                switchSearch(KWS_SEARCH);
-//            }
-//        }
     }
 
     // UI and recognizer
     private void switchSearch(int state) {
         switch (state) {
             case STATE_LISTENING:
-                recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_READY));
+                recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_DONE));
                 recognizeStart.setEnabled(true);
                 recognizeStart.setActivated(true);
-                speechService.startListening(this);
+                speechService.startListening(this, listening_timeout);
                 break;
+            case STATE_DONE:
+                speechService.stop();
+//                Yes, no break
             case STATE_READY:
                 recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_LISTENING));
                 recognizeStart.setEnabled(true);
                 recognizeStart.setActivated(false);
-                speechService.stop();
+                break;
+            case STATE_START:
+                recognizeStart.setEnabled(false);
+                recognizeStart.setActivated(false);
                 break;
             case STATE_NO_PERMISSION:
                 ActivityResultLauncher<String> mPermissionResult = registerForActivityResult(
@@ -228,7 +235,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                     speechService.stop();
                     speechService.shutdown();
                 }
-                // Todo: safely cancel everything
                 break;
         }
     }
@@ -287,5 +293,10 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         } catch (JSONException e) {
             return "";
         }
+    }
+
+    private void getListeningTimeout() {
+        int t = sharedPref.getInt("lst_listening_timeout_default_value", getResources().getInteger(R.integer.listening_timeout_default_value));
+        listening_timeout = t == 0 ? NO_TIMEOUT : t * 1000;
     }
 }

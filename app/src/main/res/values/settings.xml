@@ -31,12 +31,7 @@
         <item name="3.0">3.0</item>
     </string-array>
     <string name="gestures_speed_default_value">1.0</string>
-
-    <integer name="kws_threshold_default_value">6</integer>
-    <integer name="kws_threshold_max_value">10</integer>
-    <integer name="kws_threshold_min_value">3</integer>
-    <integer name="vad_threshold_default_value">330</integer>
-    <integer name="vad_threshold_max_value">500</integer>
-    <integer name="vad_threshold_min_value">200</integer>
-    <integer name="rec_timeout">10000</integer>
+    <integer name="listening_timeout_default_value">0</integer>
+    <integer name="listening_timeout_min_value">0</integer>
+    <integer name="listening_timeout_max_value">60</integer>
 </resources>

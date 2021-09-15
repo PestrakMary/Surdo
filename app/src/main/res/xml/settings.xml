@@ -12,6 +12,14 @@
                 android:entries="@array/gestures_speed_names"
                 android:entryValues="@array/gestures_speed_values"
                 android:defaultValue="@string/gestures_speed_default_value" />
+        <SeekBarPreference
+                android:key="lst_listening_timeout_default_value"
+                android:summary="@string/listening_timeout_summary"
+                android:title="@string/listening_timeout"
+                android:max="@integer/listening_timeout_max_value"
+                android:defaultValue="@integer/listening_timeout_default_value"
+                asp:min="@integer/listening_timeout_min_value"
+                app:showSeekBarValue="true" />
         <!--        TODO: reuse-->
         <!--        <ListPreference-->
         <!--                android:key="rec_grammar_name"-->

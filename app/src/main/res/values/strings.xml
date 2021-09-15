@@ -11,7 +11,11 @@
     <string name="vad_threshold">Фоновый шум</string>
     <string name="vad_threshold_summary">Порог наличия речи на фоне шума</string>
     <string name="gestures_speed">Показ жестов</string>
-    <string name="gestures_speed_summary">Как ускорить или замедлить демонстрацию жестов</string>
+    <string name="gestures_speed_summary">Ускорить или замедлить демонстрацию жестов</string>
+
+    <string name="listening_timeout">Тайм-аут распознавания</string>
+    <string name="listening_timeout_summary">Через сколько секунд после запуска завершить распознавание. Если 0 - завершать только вручную.</string>
+
     <string name="grammar_name">Грамматика</string>
     <string name="grammar_name_summary">Выбор грамматики, используемой для распознавания. "Long" означает возможность распознавания нескольких фраз подряд</string>
     <string name="save_logs">Сохранять логи</string>
