@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -155,7 +154,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     @Override
     public void onDestroy() {
-        //        TODO: Test
         super.onDestroy();
         if (speechService != null) {
             speechService.stop();
@@ -166,7 +164,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     @Override
     public void onStop() {
-//        TODO: Test
         super.onStop();
         if (speechService != null) {
             speechService.stop();
@@ -194,19 +191,19 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 //        }
     }
 
-    // UI
+    // UI and recognizer
     private void switchSearch(int state) {
         switch (state) {
             case STATE_LISTENING:
-                recognizeStart.setImageResource(R.drawable.microphone_on);
                 recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_READY));
                 recognizeStart.setEnabled(true);
+                recognizeStart.setActivated(true);
                 speechService.startListening(this);
                 break;
             case STATE_READY:
-                recognizeStart.setImageResource(R.drawable.microphone);
                 recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_LISTENING));
                 recognizeStart.setEnabled(true);
+                recognizeStart.setActivated(false);
                 speechService.stop();
                 break;
             case STATE_NO_PERMISSION:
@@ -215,16 +212,22 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                         result -> {
                             if (result) {
                                 permissionCheck = PackageManager.PERMISSION_GRANTED;
+                                recognizeStart.setEnabled(false);
+                                recognizeStart.setImageResource(R.drawable.microphone);
                                 startSetup();
                             }
                         });
                 recognizeStart.setOnClickListener(view1 -> mPermissionResult.launch(Manifest.permission.RECORD_AUDIO));
                 recognizeStart.setEnabled(true);
-                recognizeStart.setImageResource(R.drawable.microphone_off);
+                recognizeStart.setImageResource(R.drawable.microphone_disabled);
                 break;
             case STATE_CRASH:
                 recognizeStart.setEnabled(false);
-                recognizeStart.setImageResource(R.drawable.microphone_off);
+                recognizeStart.setImageResource(R.drawable.microphone_disabled);
+                if (speechService != null) {
+                    speechService.stop();
+                    speechService.shutdown();
+                }
                 // Todo: safely cancel everything
                 break;
         }
@@ -263,16 +266,14 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public void onResult(String res) {
         String hypothesis = getHypothesis(res);
         if (!hypothesis.isEmpty()) {
-            if (hypothesis.equals(RECOGNIZE_UNK)) {
-                textViewCommand.setText(R.string.unable_to_recognize);
-            } else {
-                textViewCommand.setText(hypothesis);
-                Matcher matcher = splitter.matcher(hypothesis);
-                while (matcher.find()) {
-                    String s = hypothesis.substring(matcher.start(), matcher.end());
-                    if (arguments.contains(s)) { // necessary until not all phrases in car.gram implemented
-                        videoViewFragmentRecognize.setVideoPath("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(s)));
-                    }
+            if (hypothesis.contains(RECOGNIZE_UNK))
+                hypothesis = hypothesis.replace(RECOGNIZE_UNK, getString(R.string.unable_to_recognize));
+            textViewCommand.setText(hypothesis);
+            Matcher matcher = splitter.matcher(hypothesis);
+            while (matcher.find()) {
+                String s = hypothesis.substring(matcher.start(), matcher.end());
+                if (arguments.contains(s)) { // necessary until not all phrases in car.gram implemented
+                    videoViewFragmentRecognize.setVideoPath("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(s)));
                 }
             }
         }
