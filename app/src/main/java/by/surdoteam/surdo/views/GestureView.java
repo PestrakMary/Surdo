@@ -4,20 +4,21 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
-import android.media.PlaybackParams;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.MediaController;
 import android.widget.VideoView;
 
 import by.surdoteam.surdo.R;
 
 public class GestureView extends VideoView {
     private static final String KEY = "mvv_gestures_speed";
+    private static final int bgColor = 0xFF454545;
     private final SharedPreferences sharedPref;
+    private float speed;
     private final MediaPlayer.OnInfoListener backgroundDisabler = (mp, what, extra) -> {
+
         if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
+            mp.setPlaybackParams(mp.getPlaybackParams().setSpeed(speed));
             // video started; hide the placeholder.
             setBackgroundColor(Color.TRANSPARENT);
             return true;
@@ -26,7 +27,6 @@ public class GestureView extends VideoView {
     };
     //    No, it cannot be local variable
     private final SharedPreferences.OnSharedPreferenceChangeListener listener;
-    private final PlaybackParams gvPlayBackParams;
 
     public GestureView(Context context) {
         this(context, null);
@@ -43,7 +43,6 @@ public class GestureView extends VideoView {
     public GestureView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        gvPlayBackParams = new PlaybackParams();
         updatePlaybackParams();
         listener = (sharedPreferences, key) -> {
             if (key.equals(KEY)) {
@@ -52,17 +51,25 @@ public class GestureView extends VideoView {
         };
 
         sharedPref.registerOnSharedPreferenceChangeListener(listener);
-        this.setOnPreparedListener(
+        setOnPreparedListener(
                 mp -> {
-                    //works only from api 23
-                    mp.setPlaybackParams(gvPlayBackParams);
+                    // For cases when app was stopped and resumed again
                     mp.setOnInfoListener(backgroundDisabler);
                 }
         );
-        setBackgroundColor(0xFF454545);
+        setBackgroundColor(bgColor);
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility == GONE) {
+//        Return from the background with proper color, and no flashes between videos in queue
+            setBackgroundColor(bgColor);
+        }
     }
 
     private void updatePlaybackParams() {
-        gvPlayBackParams.setSpeed(Float.parseFloat(sharedPref.getString(KEY, getResources().getString(R.string.gestures_speed_default_value)))); //you can set speed here
+        speed = Float.parseFloat(sharedPref.getString(KEY, getResources().getString(R.string.gestures_speed_default_value))); //you can set speed here
     }
 }
