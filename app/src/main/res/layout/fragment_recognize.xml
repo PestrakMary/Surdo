@@ -23,7 +23,7 @@
             android:layout_gravity="center"
             android:gravity="center">
 
-        <by.surdoteam.surdo.views.MultipleVideoView
+        <by.surdoteam.surdo.views.QueueGestureVideoView
                 android:id="@+id/videoViewFragmentRecognize"
                 android:layout_width="0dp"
                 android:layout_height="0dp"

@@ -43,7 +43,7 @@ public class LibFragment extends Fragment {
         listViewFragmentLib.setOnItemClickListener((parent, itemClicked, position, id) -> {
             TextView textView = (TextView) itemClicked;
             String strText = textView.getText().toString(); // получаем текст нажатого элемента
-            videoViewFragmentLib.setVideoURI(Uri.parse("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(strText))));
+            videoViewFragmentLib.setVideoPath("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(strText)));
             videoViewFragmentLib.requestFocus(0);
             videoViewFragmentLib.start();
         });

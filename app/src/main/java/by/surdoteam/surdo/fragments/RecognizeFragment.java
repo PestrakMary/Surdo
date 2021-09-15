@@ -3,15 +3,16 @@ package by.surdoteam.surdo.fragments;
 import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -37,7 +38,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import by.surdoteam.surdo.MainActivity;
-import by.surdoteam.surdo.views.MultipleVideoView;
 import by.surdoteam.surdo.R;
 import by.surdoteam.surdo.db.AppDatabase;
 import by.surdoteam.surdo.db.Command;
@@ -64,7 +64,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
     private boolean settingsChanged;
 
-    private MultipleVideoView videoViewFragmentRecognize;
+    private VideoView videoViewFragmentRecognize;
 
     private SpeechService speechService;
 
@@ -168,7 +168,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public void onStop() {
 //        TODO: Test
         super.onStop();
-        videoViewFragmentRecognize.reset();
         if (speechService != null) {
             speechService.stop();
         }
@@ -178,6 +177,9 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     @Override
     public void onStart() {
         super.onStart();
+        if (speechService != null) {
+            switchSearch(STATE_READY);
+        }
 //        if (recognizer != null) {
 //            if (settingsChanged) {
 //                recognizeStart.setEnabled(false);
@@ -197,12 +199,15 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         switch (state) {
             case STATE_LISTENING:
                 recognizeStart.setImageResource(R.drawable.microphone_on);
+                recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_READY));
+                recognizeStart.setEnabled(true);
                 speechService.startListening(this);
                 break;
             case STATE_READY:
                 recognizeStart.setImageResource(R.drawable.microphone);
                 recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_LISTENING));
                 recognizeStart.setEnabled(true);
+                speechService.stop();
                 break;
             case STATE_NO_PERMISSION:
                 ActivityResultLauncher<String> mPermissionResult = registerForActivityResult(
@@ -266,7 +271,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 while (matcher.find()) {
                     String s = hypothesis.substring(matcher.start(), matcher.end());
                     if (arguments.contains(s)) { // necessary until not all phrases in car.gram implemented
-                        videoViewFragmentRecognize.addVideo(Uri.parse("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(s))));
+                        videoViewFragmentRecognize.setVideoPath("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(s)));
                     }
                 }
             }
