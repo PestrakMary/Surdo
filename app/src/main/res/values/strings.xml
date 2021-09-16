@@ -39,5 +39,7 @@
         <p>and by <a href="https://icons8.com">Icons8</a></p>
     </string>
     <string name="icon_desc">Иконка приложения</string>
-
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="nav_header_title">Surdo</string>
+    <string name="nav_header_subtitle">surdoadapter@gmail.com</string>
 </resources>

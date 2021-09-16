@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/mobile_navigation"
+        app:startDestination="@+id/nav_recognize">
+
+    <fragment
+            android:id="@+id/nav_recognize"
+            android:name="by.surdoteam.surdo.fragments.RecognizeFragment"
+            android:label="@string/recognizer"
+            tools:layout="@layout/fragment_recognize" />
+
+    <fragment
+            android:id="@+id/nav_lib"
+            android:name="by.surdoteam.surdo.fragments.LibFragment"
+            android:label="@string/library"
+            tools:layout="@layout/fragment_lib" />
+
+    <fragment
+            android:id="@+id/nav_settings"
+            android:name="by.surdoteam.surdo.fragments.SettingsFragment"
+            android:label="@string/settings" />
+
+    <fragment
+            android:id="@+id/nav_about"
+            android:name="by.surdoteam.surdo.fragments.AboutFragment"
+            android:label="@string/about" />
+</navigation>
