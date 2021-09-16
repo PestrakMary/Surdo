@@ -8,11 +8,13 @@ import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.widget.VideoView;
 
+import androidx.core.content.ContextCompat;
+
 import by.surdoteam.surdo.R;
 
 public class GestureView extends VideoView {
     private static final String KEY = "mvv_gestures_speed";
-    private static final int bgColor = 0xFF454545;
+    private final int bgColor = ContextCompat.getColor(getContext(), R.color.colorGestureBackground);;
     private final SharedPreferences sharedPref;
     private float speed;
     private final MediaPlayer.OnInfoListener backgroundDisabler = (mp, what, extra) -> {
@@ -49,7 +51,6 @@ public class GestureView extends VideoView {
                 updatePlaybackParams();
             }
         };
-
         sharedPref.registerOnSharedPreferenceChangeListener(listener);
         setOnPreparedListener(
                 mp -> {

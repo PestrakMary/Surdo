@@ -6,4 +6,5 @@
 <!--    Custom values   -->
     <color name="colorAccentGrey">#66B1C5</color>
     <color name="colorAccentLight">#3DCAEF</color>
+    <color name="colorGestureBackground">#454545</color>
 </resources>
