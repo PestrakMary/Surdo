@@ -114,6 +114,10 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         textViewCommand = view.findViewById(R.id.textViewCommand);
 
 //        We already started setup in onCreate, but can call switchSearch only here, when UI was created
+        if (speechService != null) {
+//            We don't know what will be called first: onCreateView or callback in startSetup
+            switchSearch(STATE_READY);
+        }
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             switchSearch(STATE_NO_PERMISSION);
         } else {
@@ -129,7 +133,9 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         StorageService.unpack(this.getContext(), "vosk-model-small-ru-0.15", "model",
                 (model) -> {
                     setupRecognizer(model);
-                    switchSearch(STATE_READY);
+                    if (recognizeStart != null) {
+                        switchSearch(STATE_READY);
+                    }
                 },
                 (exception) -> setErrorState("Failed to unpack the model: " + exception.getLocalizedMessage()));
     }
