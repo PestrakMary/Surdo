@@ -1,6 +1,5 @@
 package by.surdoteam.surdo.fragments;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import by.surdoteam.surdo.MainActivity;
@@ -43,7 +41,7 @@ public class LibFragment extends Fragment {
         listViewFragmentLib.setOnItemClickListener((parent, itemClicked, position, id) -> {
             TextView textView = (TextView) itemClicked;
             String strText = textView.getText().toString(); // получаем текст нажатого элемента
-            videoViewFragmentLib.setVideoURI(Uri.parse("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(strText))));
+            videoViewFragmentLib.setVideoPath("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(strText)));
             videoViewFragmentLib.requestFocus(0);
             videoViewFragmentLib.start();
         });

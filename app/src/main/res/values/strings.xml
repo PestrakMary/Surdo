@@ -10,6 +10,11 @@
     <string name="kws_threshold_summary">Чувствительность распознавания активационной фразы</string>
     <string name="vad_threshold">Фоновый шум</string>
     <string name="vad_threshold_summary">Порог наличия речи на фоне шума</string>
+    <string name="gestures_speed">Показ жестов</string>
+    <string name="gestures_speed_summary">Ускорить или замедлить демонстрацию жестов</string>
+
+    <string name="listening_timeout">Тайм-аут распознавания</string>
+    <string name="listening_timeout_summary">Через сколько секунд после запуска завершить распознавание. Если 0 - завершать только вручную.</string>
 
     <string name="grammar_name">Грамматика</string>
     <string name="grammar_name_summary">Выбор грамматики, используемой для распознавания. "Long" означает возможность распознавания нескольких фраз подряд</string>
@@ -19,12 +24,13 @@
 
     <string name="recognizer">Переводчик</string>
     <string name="prompt_command">Здесь будет отображаться ваша голосовая команда</string>
+    <string name="unable_to_recognize">Не удалось распознать</string>
 
     <string name="about">О приложении</string>
     <string name="name"><p><font size="24"><b>Surdo</b></font></p></string>
-    <string name="version"><p><font size="24"><b><p><font color="grey">Версия v0.4.1</font></p></b></font></p></string>
+    <string name="version"><p><font size="24"><b><p><font color="grey">Версия vVERSION_NAME_PLACEHOLDER</font></p></b></font></p></string>
     <string name="about_text">
-        <p>Приложение для перевода голосовых команд в язык жестов.</p>
+        <p>Приложение для перевода голосовых команд на язык жестов.</p>
         <p>Эта программа лицензирована по MIT.</p>
         <p>Исходный код доступен на <a href="https://github.com/PestrakMary/Surdo">GitHub</a>.</p>
     </string>
@@ -33,5 +39,7 @@
         <p>and by <a href="https://icons8.com">Icons8</a></p>
     </string>
     <string name="icon_desc">Иконка приложения</string>
-
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="nav_header_title">Surdo</string>
+    <string name="nav_header_subtitle">surdoadapter@gmail.com</string>
 </resources>

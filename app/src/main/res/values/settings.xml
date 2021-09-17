@@ -11,12 +11,27 @@
     <string name="grammar_name_default_value">
         car_long.gram
     </string>
-    <integer name="kws_threshold_default_value">6</integer>
-    <integer name="kws_threshold_max_value">10</integer>
-    <integer name="kws_threshold_min_value">3</integer>
-    <integer name="vad_threshold_default_value">330</integer>
-    <integer name="vad_threshold_max_value">500</integer>
-    <integer name="vad_threshold_min_value">200</integer>
-    <integer name="rec_timeout">10000</integer>
-    <string name="rec_keyphrase">активировать</string>
+    <!--    x0.25, x0.5, x0.75, x1.0, x1.5, x2.0, x3.0-->
+    <string-array name="gestures_speed_names">
+        <item name="0.25">x0.25</item>
+        <item name="0.5">x0.5</item>
+        <item name="0.75">x0.75</item>
+        <item name="1.0">x1.0</item>
+        <item name="1.5">x1.5</item>
+        <item name="2.0">x2.0</item>
+        <item name="3.0">x3.0</item>
+    </string-array>
+    <string-array name="gestures_speed_values">
+        <item name="0.25">0.25</item>
+        <item name="0.5">0.5</item>
+        <item name="0.75">0.75</item>
+        <item name="1.0">1.0</item>
+        <item name="1.5">1.5</item>
+        <item name="2.0">2.0</item>
+        <item name="3.0">3.0</item>
+    </string-array>
+    <string name="gestures_speed_default_value">1.0</string>
+    <integer name="listening_timeout_default_value">0</integer>
+    <integer name="listening_timeout_min_value">0</integer>
+    <integer name="listening_timeout_max_value">60</integer>
 </resources>

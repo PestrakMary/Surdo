@@ -1,23 +1,23 @@
 package by.surdoteam.surdo;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
+import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.room.Room;
 
 import com.google.android.material.navigation.NavigationView;
 
 import by.surdoteam.surdo.db.AppDatabase;
-import by.surdoteam.surdo.fragments.AboutFragment;
-import by.surdoteam.surdo.fragments.LibFragment;
-import by.surdoteam.surdo.fragments.RecognizeFragment;
-import by.surdoteam.surdo.fragments.SettingsFragment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,11 +27,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity {
+    private AppBarConfiguration mAppBarConfiguration;
     private AppDatabase database = null;
-    private LibFragment libFragment = null;
-    private RecognizeFragment recognizeFragment = null;
-    private SettingsFragment settingsFragment = null;
-    private AboutFragment aboutFragment = null;
     private final Map<String, Integer> library = new TreeMap<>();
 
     public AppDatabase getDatabase() {
@@ -51,149 +48,53 @@ public class MainActivity extends AppCompatActivity {
                 eachLine = bufferedReader.readLine();
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Toast.makeText(getApplicationContext(), ex.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        NavigationView navigationView = findViewById(R.id.navigation);
-        navigationView.
-                setNavigationItemSelectedListener
-                        (menuItem -> {
-                            int id = menuItem.getItemId();
-                            if (id == R.id.recognizer_settings) {
-                                getSupportFragmentManager().
-                                        beginTransaction().
-                                        replace(R.id.fragmentContainer,
-                                                getRecognizeFragment())
-                                        .addToBackStack(null)
-                                        .commit();
-                            } else if (id == R.id.library_settings) {
-                                getSupportFragmentManager().
-                                        beginTransaction().
-                                        replace(R.id.fragmentContainer,
-                                                getLibFragment())
-                                        .addToBackStack(null)
-                                        .commit();
-                            } else if (id == R.id.action_settings) {
-                                getSupportFragmentManager().
-                                        beginTransaction().
-                                        replace(R.id.fragmentContainer,
-                                                getSettingsFragment())
-                                        .addToBackStack(null)
-                                        .commit();
-                            } else if (id == R.id.about_settings) {
-                                getSupportFragmentManager().
-                                        beginTransaction().
-                                        replace(R.id.fragmentContainer,
-                                                getAboutFragment())
-                                        .addToBackStack(null)
-                                        .commit();
-                            } else {
-                                return false;
-                            }
-                            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-                            drawer.closeDrawer(GravityCompat.START, true);
-                            return true;
-                        });
-
         readLibrary();
-
         database = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "library")
                 .allowMainThreadQueries()
                 .build();
         database.initializeDB(library);
-
-        FragmentManager fm = getSupportFragmentManager();
-        recognizeFragment = (RecognizeFragment) fm.findFragmentById(R.id.fragmentContainer);
-        if (recognizeFragment == null) {
-            recognizeFragment = new RecognizeFragment();
-            fm.beginTransaction()
-                    .add(R.id.fragmentContainer, recognizeFragment)
-                    .addToBackStack(null)
-                    .commit();
-        }
-        libFragment = (LibFragment) fm.findFragmentById(R.id.fragmentContainer);
-        settingsFragment = (SettingsFragment) fm.findFragmentById(R.id.fragmentContainer);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        // Passing each menu ID as a set of Ids because each
+        // menu should be considered as top level destinations.
+        mAppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_recognize, R.id.nav_lib, R.id.nav_settings, R.id.nav_about)
+                .setOpenableLayout(drawer)
+                .build();
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        NavigationUI.setupWithNavController(navigationView, navController);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                || super.onSupportNavigateUp();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.recognizer_settings) {
-            getSupportFragmentManager().
-                    beginTransaction().
-                    replace(R.id.fragmentContainer,
-                            getRecognizeFragment())
-                    .addToBackStack(null)
-                    .commit();
-            return true;
-        } else if (id ==R.id.library_settings) {
-            getSupportFragmentManager().
-                    beginTransaction().
-                    replace(R.id.fragmentContainer,
-                            getLibFragment())
-                    .addToBackStack(null)
-                    .commit();
-            return true;
-        } else if (id == R.id.action_settings) {
-            getSupportFragmentManager().
-                    beginTransaction().
-                    replace(R.id.fragmentContainer,
-                            getSettingsFragment())
-                    .addToBackStack(null)
-                    .commit();
-            return true;
-        } else if (id == R.id.about_settings) {
-                getSupportFragmentManager().
-                        beginTransaction().
-                        replace(R.id.fragmentContainer,
-                                getAboutFragment())
-                        .addToBackStack(null)
-                        .commit();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    public LibFragment getLibFragment() {
-        if (libFragment == null) {
-            libFragment = new LibFragment();
-        }
-        return libFragment;
-    }
-
-    public RecognizeFragment getRecognizeFragment() {
-        if (recognizeFragment == null) {
-            recognizeFragment = new RecognizeFragment();
-        }
-        return recognizeFragment;
-    }
-
-    public AboutFragment getAboutFragment() {
-        if (aboutFragment == null) {
-            aboutFragment = new AboutFragment();
-        }
-        return aboutFragment;
-    }
-
-    public SettingsFragment getSettingsFragment() {
-        if (settingsFragment == null) {
-            settingsFragment = new SettingsFragment();
-        }
-        return settingsFragment;
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        return NavigationUI.onNavDestinationSelected(item, navController)
+                || super.onOptionsItemSelected(item);
     }
 }

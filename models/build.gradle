@@ -1,0 +1,31 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 30
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+    }
+    buildFeatures {
+        buildConfig = false
+    }
+    sourceSets {
+        main {
+            assets.srcDirs += "$buildDir/generated/assets"
+        }
+    }
+}
+
+tasks.register('genUUID') {
+    def uuid = UUID.randomUUID().toString()
+    def outDir = file("$buildDir/generated/assets/vosk-model-small-ru-0.15")
+    def outFile = file("$outDir/uuid")
+    doLast {
+        mkdir outDir
+        outFile.text = uuid
+    }
+}
+
+preBuild.dependsOn(genUUID)

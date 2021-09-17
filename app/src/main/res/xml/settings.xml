@@ -5,37 +5,37 @@
     <PreferenceCategory
             app:key="recognition_category"
             app:title="@string/recognition_category">
-        <SeekBarPreference
-                android:key="rec_kws_threshold"
-                android:summary="@string/kws_threshold_summary"
-                android:title="@string/kws_threshold"
-                android:max="@integer/kws_threshold_max_value"
-                android:defaultValue="@integer/kws_threshold_default_value"
-                asp:min="@integer/kws_threshold_min_value"
-                app:showSeekBarValue="true" />
-        <SeekBarPreference
-                android:key="rec_vad_threshold"
-                android:summary="@string/vad_threshold_summary"
-                android:title="@string/vad_threshold"
-                android:max="@integer/vad_threshold_max_value"
-                android:defaultValue="@integer/vad_threshold_default_value"
-                asp:min="@integer/vad_threshold_min_value"
-                app:showSeekBarValue="true" />
         <ListPreference
-                android:key="rec_grammar_name"
-                android:summary="@string/grammar_name_summary"
-                android:title="@string/grammar_name"
-                android:entries="@array/grammar_name_names"
-                android:entryValues="@array/grammar_name_values"
-                android:defaultValue="@string/grammar_name_default_value"/>
+                android:key="mvv_gestures_speed"
+                android:summary="@string/gestures_speed_summary"
+                android:title="@string/gestures_speed"
+                android:entries="@array/gestures_speed_names"
+                android:entryValues="@array/gestures_speed_values"
+                android:defaultValue="@string/gestures_speed_default_value" />
+        <SeekBarPreference
+                android:key="lst_listening_timeout_default_value"
+                android:summary="@string/listening_timeout_summary"
+                android:title="@string/listening_timeout"
+                android:max="@integer/listening_timeout_max_value"
+                android:defaultValue="@integer/listening_timeout_default_value"
+                asp:min="@integer/listening_timeout_min_value"
+                app:showSeekBarValue="true" />
+        <!--        TODO: reuse-->
+        <!--        <ListPreference-->
+        <!--                android:key="rec_grammar_name"-->
+        <!--                android:summary="@string/grammar_name_summary"-->
+        <!--                android:title="@string/grammar_name"-->
+        <!--                android:entries="@array/grammar_name_names"-->
+        <!--                android:entryValues="@array/grammar_name_values"-->
+        <!--                android:defaultValue="@string/grammar_name_default_value"/>-->
     </PreferenceCategory>
-    <PreferenceCategory
-            app:key="debug_category"
-            app:title="@string/debug_category">
-    <CheckBoxPreference
-            android:key="rec_save_logs"
-            android:summary="@string/save_logs_summary"
-            android:title="@string/save_logs"
-            android:defaultValue="false"/>
-    </PreferenceCategory>
+    <!--    <PreferenceCategory-->
+    <!--            app:key="debug_category"-->
+    <!--            app:title="@string/debug_category">-->
+    <!--    <CheckBoxPreference-->
+    <!--            android:key="rec_save_logs"-->
+    <!--            android:summary="@string/save_logs_summary"-->
+    <!--            android:title="@string/save_logs"-->
+    <!--            android:defaultValue="false"/>-->
+    <!--    </PreferenceCategory>-->
 </PreferenceScreen>

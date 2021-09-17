@@ -1,2 +1,3 @@
-include ':app', ':pocketsphinx-android-5prealpha-release'
+include ':models'
+include ':app'
 rootProject.name='Surdo'
