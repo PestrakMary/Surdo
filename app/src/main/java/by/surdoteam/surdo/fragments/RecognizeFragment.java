@@ -117,8 +117,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         if (speechService != null) {
 //            We don't know what will be called first: onCreateView or callback in startSetup
             switchSearch(STATE_READY);
-        }
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+        } else if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             switchSearch(STATE_NO_PERMISSION);
         } else {
             switchSearch(STATE_START);
