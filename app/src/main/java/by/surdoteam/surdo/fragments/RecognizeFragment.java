@@ -70,15 +70,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private int listening_timeout;
 
     public RecognizeFragment() {
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        settingsChanged = false;
-        getListeningTimeout();
-//        cause the preference manager does not currently store a strong reference to the listener
+        //        cause the preference manager does not currently store a strong reference to the listener
         listener = (sharedPreferences, key) -> {
 //            Toast.makeText(requireActivity().getApplicationContext(), R.string.restart_app, Toast.LENGTH_LONG).show();
             if (key.startsWith("rec_")) {
@@ -87,6 +79,14 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 getListeningTimeout();
             }
         };
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        settingsChanged = false;
+        getListeningTimeout();
         sharedPref.registerOnSharedPreferenceChangeListener(listener);
         // get permissions
         permissionCheck = ContextCompat.checkSelfPermission(requireActivity().getApplicationContext(), Manifest.permission.RECORD_AUDIO);
@@ -131,9 +131,11 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         }
         StorageService.unpack(this.getContext(), "vosk-model-small-ru-0.15", "model",
                 (model) -> {
-                    setupRecognizer(model);
-                    if (recognizeStart != null) {
-                        switchSearch(STATE_READY);
+                    if (isAdded()) {
+                        setupRecognizer(model);
+                        if (recognizeStart != null) {
+                            switchSearch(STATE_READY);
+                        }
                     }
                 },
                 (exception) -> setErrorState("Failed to unpack the model: " + exception.getLocalizedMessage()));
@@ -165,10 +167,11 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     public void onDestroy() {
         super.onDestroy();
         if (speechService != null) {
-            speechService.stop();
+            speechService.cancel(); // no callbacks will be called
             speechService.shutdown();
             speechService = null;
         }
+        sharedPref.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
     @Override
@@ -250,19 +253,21 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     }
 
     private void setErrorState(String message) {
-        Toast.makeText(requireActivity().getApplicationContext(), Objects.requireNonNull(message), Toast.LENGTH_LONG).show();
-        switchSearch(STATE_CRASH);
+        if (isAdded()) {
+            Toast.makeText(requireContext(), Objects.requireNonNull(message), Toast.LENGTH_LONG).show();
+            switchSearch(STATE_CRASH);
+        }
     }
 
     @Override
     public void onTimeout() {
-        switchSearch(STATE_DONE);
+        switchSearch(STATE_READY);
     }
 
     @Override
     public void onFinalResult(String hypothesis) {
         onResult(hypothesis);
-        switchSearch(STATE_DONE);
+        switchSearch(STATE_READY);
     }
 
     @Override
@@ -270,9 +275,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 // Just nothing
     }
 
-    /**
-     * This callback is called when we stop the recognizer.
-     */
+
     @Override
     public void onResult(String res) {
         String hypothesis = getHypothesis(res);
