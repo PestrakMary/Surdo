@@ -61,13 +61,14 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private SharedPreferences sharedPref;
     //    listener must not be converted to local variable as registerOnSharedPreferenceChangeListener
     //    doesn't create strong link, so local var will be garbage collected
-    private SharedPreferences.OnSharedPreferenceChangeListener listener;
+    private final SharedPreferences.OnSharedPreferenceChangeListener listener;
     private boolean settingsChanged;
 
     private VideoView videoViewFragmentRecognize;
 
     private SpeechService speechService;
-    private int listening_timeout;
+    private int listeningTimeout;
+
 
     public RecognizeFragment() {
         //        cause the preference manager does not currently store a strong reference to the listener
@@ -207,7 +208,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 recognizeStart.setOnClickListener(view1 -> switchSearch(STATE_DONE));
                 recognizeStart.setEnabled(true);
                 recognizeStart.setActivated(true);
-                speechService.startListening(this, listening_timeout);
+                speechService.startListening(this, listeningTimeout);
                 break;
             case STATE_DONE:
                 speechService.stop();
@@ -305,6 +306,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     private void getListeningTimeout() {
         int t = sharedPref.getInt("lst_listening_timeout_default_value", getResources().getInteger(R.integer.listening_timeout_default_value));
-        listening_timeout = t == 0 ? NO_TIMEOUT : t * 1000;
+        listeningTimeout = t == 0 ? NO_TIMEOUT : t * 1000;
     }
 }
