@@ -1,9 +1,14 @@
 package by.surdoteam.surdo.fragments;
 
 import android.os.Bundle;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -23,11 +28,18 @@ import by.surdoteam.surdo.db.Command;
 public class LibFragment extends Fragment {
 
     private VideoView videoViewFragmentLib;
-    List<String> arguments;
-    List<Integer> video;
+    List<Command> commands;
     AppDatabase database;
 
     public LibFragment() {
+    }
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        database = ((MainActivity) requireActivity()).getDatabase();
+        commands = database.CommandDao().getPrimary();
     }
 
     @Override
@@ -37,31 +49,13 @@ public class LibFragment extends Fragment {
         ListView listViewFragmentLib = view.findViewById(R.id.listViewFragmentLib);
         videoViewFragmentLib = view.findViewById(R.id.videoViewFragmentLib);
 
-        listViewFragmentLib.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, arguments));
+        listViewFragmentLib.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1,
+                commands.stream().map(Command::getWord).collect(Collectors.toList())));
         listViewFragmentLib.setOnItemClickListener((parent, itemClicked, position, id) -> {
-            TextView textView = (TextView) itemClicked;
-            String strText = textView.getText().toString(); // получаем текст нажатого элемента
-            videoViewFragmentLib.setVideoPath("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(strText)));
+            videoViewFragmentLib.setVideoPath(commands.get(position).getPath());
             videoViewFragmentLib.requestFocus(0);
             videoViewFragmentLib.start();
         });
         return view;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        database = ((MainActivity) requireActivity()).getDatabase();
-
-        arguments = database.CommandDao().
-                getAll().
-                stream().
-                map((command -> command.getWord().split("\\|")[0])).
-                collect(Collectors.toList());
-        video = database.CommandDao().
-                getAll().
-                stream().
-                map(Command::getPath).
-                collect(Collectors.toList());
     }
 }

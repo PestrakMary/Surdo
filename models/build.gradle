@@ -18,14 +18,17 @@ android {
     }
 }
 
-tasks.register('genUUID') {
-    def uuid = UUID.randomUUID().toString()
-    def outDir = file("$buildDir/generated/assets/vosk-model-small-ru-0.15")
-    def outFile = file("$outDir/uuid")
-    doLast {
-        mkdir outDir
-        outFile.text = uuid
+abstract class GenUUID extends DefaultTask {
+    @OutputFile
+    abstract RegularFileProperty getOutputFile()
+    @TaskAction
+    void execute() {
+        outputFile.get().asFile.text = UUID.randomUUID().toString()
     }
+}
+
+tasks.register('genUUID', GenUUID) {
+    outputFile = file("$buildDir/generated/assets/vosk-model-small-ru-0.15/uuid")
 }
 
 preBuild.dependsOn(genUUID)

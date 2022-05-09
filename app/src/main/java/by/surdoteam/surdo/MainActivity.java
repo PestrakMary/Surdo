@@ -1,14 +1,12 @@
 package by.surdoteam.surdo;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
-
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -19,48 +17,24 @@ import com.google.android.material.navigation.NavigationView;
 
 import by.surdoteam.surdo.db.AppDatabase;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Map;
-import java.util.TreeMap;
-
 public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private AppDatabase database = null;
-    private final Map<String, Integer> library = new TreeMap<>();
 
     public AppDatabase getDatabase() {
         return database;
     }
 
-    public void readLibrary() {
-        try {
-            InputStream inputStream = getResources().openRawResource(R.raw.lib);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String eachLine = bufferedReader.readLine();
-            while (eachLine != null) {
-                // `the words in the file are separated by space`, so to get each words
-                String[] words = eachLine.split(", ");
-                library.put(words[0], this.getResources().getIdentifier(words[1],
-                        "raw", this.getPackageName()));
-                eachLine = bufferedReader.readLine();
-            }
-        } catch (IOException ex) {
-            Toast.makeText(getApplicationContext(), ex.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        readLibrary();
         database = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "library")
+                .createFromAsset("database/library.db")
                 .allowMainThreadQueries()
+//                version 1 was nothing but trash
+                .fallbackToDestructiveMigrationFrom(1)
                 .build();
-        database.initializeDB(library);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

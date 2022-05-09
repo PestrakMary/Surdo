@@ -5,6 +5,18 @@ import androidx.room.PrimaryKey;
 
 @Entity
 public class Command {
+    private String word;
+    private String path;
+    private boolean primary;
+
+    @PrimaryKey(autoGenerate = true)
+    private long id;
+
+    public Command(String word, String path) {
+        this.word = word;
+        this.path = path;
+    }
+
     public String getWord() {
         return word;
     }
@@ -13,22 +25,27 @@ public class Command {
         this.word = word;
     }
 
-    public Integer getPath() {
+    public String getPath() {
         return path;
     }
 
-    public void setPath(Integer path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
-    public Command(String word, Integer path) {
-        this.word = word;
-        this.path = path;
+    public boolean isPrimary() {
+        return primary;
     }
 
-    public String word;
-    public Integer path;
+    public void setPrimary(boolean primary) {
+        this.primary = primary;
+    }
 
-    @PrimaryKey(autoGenerate = true)
-    public long id;
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 }

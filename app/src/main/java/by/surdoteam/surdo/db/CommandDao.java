@@ -15,6 +15,9 @@ public interface CommandDao {
     @Query("SELECT * FROM command")
     List<Command> getAll();
 
+    @Query("SELECT * FROM command WHERE `primary` = 1")
+    List<Command> getPrimary();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Command command);
 

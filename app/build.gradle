@@ -1,11 +1,21 @@
+import org.gradle.work.Incremental
+
+import java.nio.file.Paths
+import java.sql.DriverManager
+import groovy.json.JsonSlurper
+import groovy.sql.Sql
+
 apply plugin: 'com.android.application'
 
 repositories {
     google()
+    mavenCentral()
     maven {
         url 'https://alphacephei.com/maven/'
     }
 }
+
+configurations { driver }
 
 android {
     compileSdkVersion 31
@@ -22,6 +32,15 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
+        }
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                        "room.schemaLocation"  : "$projectDir/schemas".toString(),
+                        "room.incremental"     : "true",
+                        "room.expandProjection": "true"
+                ]
+            }
         }
     }
     buildTypes {
@@ -54,4 +73,70 @@ dependencies {
     implementation 'net.java.dev.jna:jna:5.10.0@aar'
     implementation group: 'com.alphacephei', name: 'vosk-android', version: '0.3.23'
     implementation project(':models')
+    driver 'org.xerial:sqlite-jdbc:3.25.2'
+}
+
+abstract class BuildDBTask extends DefaultTask {
+    @Incremental
+    @InputDirectory
+    abstract DirectoryProperty getRaw();
+
+    @Incremental
+    @InputFile
+    abstract RegularFileProperty getJson();
+
+    @OutputFile
+    abstract RegularFileProperty getDatabase();
+
+    @TaskAction
+    void execute() {
+        println 'buildDB is in building'
+        System.err.println("Don't forget to increase DB version if you changed something")
+        Map<String, List<String>> library = new JsonSlurper().parseText(json.get().asFile.text)
+        def videos = raw.get().asFileTree.matching(new PatternSet().include("*.mp4")).asList().stream().
+                collect() { file -> file.name.split("\\.")[0] }
+        def diff = library.keySet().toArray() - videos.toArray() - [""]
+        if (diff.size() != 0)
+            throw new Exception("Videos ${diff} aren't present in 'raw' folder, but are used in config")
+        def unused = videos.toArray() - library.keySet().toArray()
+        if (unused.size() != 0)
+            System.err.println "Videos ${unised} are present in 'raw' folder, but aren't used in config"
+        database.get().asFile.delete()
+        DriverManager.registerDriver(GroovyObject.class.classLoader.loadClass("org.sqlite.JDBC").newInstance())
+        def db = Sql.newInstance("jdbc:sqlite:${database.get().asFile.path}", "org.sqlite.JDBC")
+        try {
+            db.execute("CREATE TABLE IF NOT EXISTS `Command` (`word` TEXT, `path` TEXT, `primary` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)")
+            library.each { entry ->
+                def path = "android.resource://by.surdoteam.surdo/raw/${entry.key}"
+                entry.value.eachWithIndex { word, index ->
+                    db.execute(
+                            "INSERT INTO `Command` (`word`, `path`, `primary`) VALUES(?, ?, ?)", [word, path, index == 0 ? 1 : 0]
+                    )
+                }
+            }
+        }
+        finally {
+            db.close()
+        }
+    }
+}
+
+
+task buildDB(type: BuildDBTask) {
+    raw = file(Paths.get(android.sourceSets.main.res.srcDirs[0].toString(), 'raw'))
+    json = file(Paths.get("libraries", "driving.json"))
+    database = file(Paths.get(android.sourceSets.main.assets.srcDirs[0].toString(), "database", "library.db"))
+    doFirst {
+        println "Loading driver"
+        ClassLoader loader = Sql.classLoader
+        configurations.driver.each { File file ->
+            loader.addURL(file.toURI().toURL())
+        }
+    }
+}
+
+preBuild.dependsOn buildDB
+
+tasks.withType(JavaCompile) {
+    options.deprecation = true
 }

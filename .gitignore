@@ -12,3 +12,5 @@ app/src/main/assets/sync/car_long.gram
 /pocketsphinx-android-5prealpha-release/build
 /models/src/main/assets
 /models/build/
+app/src/main/assets/database/library.db
+app/schemas/

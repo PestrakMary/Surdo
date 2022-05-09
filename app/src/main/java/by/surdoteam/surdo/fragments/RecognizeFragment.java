@@ -4,7 +4,9 @@ import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+
+import androidx.preference.PreferenceManager;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,8 +56,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 
     private Pattern splitter;
     private int permissionCheck;
-    private List<String> arguments;
-    private List<Integer> video;
+    private List<Command> commands;
     private TextView textViewCommand;
     private FloatingActionButton recognizeStart;
     private SharedPreferences sharedPref;
@@ -93,14 +94,7 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
         permissionCheck = ContextCompat.checkSelfPermission(requireActivity().getApplicationContext(), Manifest.permission.RECORD_AUDIO);
         AppDatabase database = ((MainActivity) requireActivity()).getDatabase();
 
-        arguments = new LinkedList<>();
-        video = new LinkedList<>();
-        for (Command command : database.CommandDao().getAll()) {
-            for (String word : command.getWord().split("\\|")) {
-                arguments.add(word);
-                video.add(command.getPath());
-            }
-        }
+        commands = database.CommandDao().getAll();
         startSetup();
     }
 
@@ -145,10 +139,10 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
     private void setupRecognizer(Model m) {
         StringBuilder parserPattern = new StringBuilder("((?<=^| )(?:(?:");
         StringBuilder grammarJSON = new StringBuilder("[");
-        for (int i = 0; i < arguments.size(); i++) {
-            parserPattern.append(arguments.get(i));
-            grammarJSON.append("\"").append(arguments.get(i)).append("\", ");
-            if (i < arguments.size() - 1) {
+        for (int i = 0; i < commands.size(); i++) {
+            parserPattern.append(commands.get(i).getWord());
+            grammarJSON.append("\"").append(commands.get(i).getWord()).append("\", ");
+            if (i < commands.size() - 1) {
                 parserPattern.append(")|(?:");
             }
         }
@@ -276,7 +270,6 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
 // Just nothing
     }
 
-
     @Override
     public void onResult(String res) {
         String hypothesis = getHypothesis(res);
@@ -285,10 +278,12 @@ public class RecognizeFragment extends Fragment implements RecognitionListener {
                 hypothesis = hypothesis.replace(RECOGNIZE_UNK, getString(R.string.unable_to_recognize));
             textViewCommand.setText(hypothesis);
             Matcher matcher = splitter.matcher(hypothesis);
+            Command command;
             while (matcher.find()) {
-                String s = hypothesis.substring(matcher.start(), matcher.end());
-                if (arguments.contains(s)) { // necessary until not all phrases in car.gram implemented
-                    videoViewFragmentRecognize.setVideoPath("android.resource://" + requireActivity().getPackageName() + "/" + video.get(arguments.indexOf(s)));
+                String group = matcher.group();
+                command = commands.stream().filter(c -> (c.getWord().equals(group))).findFirst().orElse(null);
+                if (command != null) { // necessary until not all phrases in car.gram implemented
+                    videoViewFragmentRecognize.setVideoPath(command.getPath());
                 }
             }
         }
